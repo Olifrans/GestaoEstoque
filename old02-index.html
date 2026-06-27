@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global SCM • Supply Chain Management System</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+        --bg-900: #0a0e1a;
+        --bg-800: #111827;
+        --bg-700: #1f2937;
+        --bg-600: #374151;
+        --accent: #00d4ff;
+        --accent-2: #0ea5e9;
+        --accent-3: #06b6d4;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --text: #e5e7eb;
+        --text-muted: #9ca3af;
+        --border: #1f2937;
+    }
+    body {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        background: var(--bg-900);
+        color: var(--text);
+        display: flex;
+        min-height: 100vh;
+        font-size: 14px;
+    }
+    /* SIDEBAR */
+    .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #0d1321 0%, #0a0e1a 100%);
+        padding: 24px 16px;
+        border-right: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+    .logo-icon {
+        width: 36px; height: 36px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px;
+    }
+    .logo-text h1 { font-size: 15px; color: var(--text); font-weight: 700; letter-spacing: 0.5px; }
+    .logo-text p { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .nav-section-title {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+        margin: 20px 8px 10px;
+    }
+    .nav-item {
+        padding: 11px 14px;
+        margin: 2px 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+    .nav-item:hover { background: var(--bg-700); color: var(--text); }
+    .nav-item.active {
+        background: linear-gradient(90deg, rgba(0,212,255,0.15), transparent);
+        color: var(--accent);
+        border-left: 3px solid var(--accent);
+        padding-left: 11px;
+    }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+    /* MAIN */
+    .main { flex: 1; padding: 28px 36px; overflow-x: hidden; }
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+    .topbar h2 { font-size: 22px; font-weight: 600; }
+    .topbar .breadcrumb { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .topbar-actions { display: flex; gap: 12px; align-items: center; }
+    .search-box {
+        background: var(--bg-800);
+        border: 1px solid var(--border);
+        padding: 8px 14px;
+        border-radius: 8px;
+        color: var(--text);
+        width: 260px;
+        font-size: 13px;
+    }
+    .search-box:focus { outline: none; border-color: var(--accent); }
+    .btn-icon {
+        width: 38px; height: 38px;
+        background: var(--bg-800);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        position: relative;
+    }
+    .badge-dot {
+        position: absolute; top: 8px; right: 8px;
+        width: 8px; height: 8px;
+        background: var(--danger);
+        border-radius: 50%;
+        border: 2px solid var(--bg-900);
+    }
+
+    /* SECTIONS */
+    .section { display: none; animation: fadeIn 0.4s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* KPI CARDS */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .kpi-card {
+        background: var(--bg-800);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: var(--accent);
+    }
+    .kpi-card.success::before { background: var(--success); }
+    .kpi-card.warning::before { background: var(--warning); }
+    .kpi-card.danger::before { background: var(--danger); }
+    .kpi-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .kpi-value {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px;
+    }
+    .kpi-change {
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .kpi-change.up { color: var(--success); }
+    .kpi-change.down { color: var(--danger); }
+    .kpi-icon {
+        position: absolute;
+        top: 20px; right: 20px;
+        font-size: 24px;
+        opacity: 0.3;
+    }
+
+    /* PANELS */
+    .panel {
+        background: var(--bg-800);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 20px;
+    }
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+    .panel-title { font-size: 15px; font-weight: 600; }
+    .panel-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media (max-width: 1200px) {
+        .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* TABLES */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+        text-align: left;
+        padding: 12px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+        font-weight: 600;
+    }
+    tbody td {
+        padding: 14px 12px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+    }
+    tbody tr:hover { background: rgba(0,212,255,0.03); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* BADGES */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .badge-dot-sm {
+        width: 6px; height: 6px; border-radius: 50%;
+    }
+    .badge.transit { background: rgba(14,165,233,0.15); color: #38bdf8; }
+    .badge.transit .badge-dot-sm { background: #38bdf8; }
+    .badge.customs { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .badge.customs .badge-dot-sm { background: #fbbf24; }
+    .badge.delivered { background: rgba(16,185,129,0.15); color: #34d399; }
+    .badge.delivered .badge-dot-sm { background: #34d399; }
+    .badge.delayed { background: rgba(239,68,68,0.15); color: #f87171; }
+    .badge.delayed .badge-dot-sm { background: #f87171; }
+    .badge.pending { background: rgba(156,163,175,0.15); color: #9ca3af; }
+    .badge.pending .badge-dot-sm { background: #9ca3af; }
+
+    .mode-badge {
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .mode-sea { background: #1e3a8a; color: #93c5fd; }
+    .mode-air { background: #7c2d12; color: #fdba74; }
+    .mode-road { background: #365314; color: #bef264; }
+    .mode-rail { background: #581c87; color: #d8b4fe; }
+
+    /* WORLD MAP SVG */
+    .world-map-container {
+        position: relative;
+        background: radial-gradient(ellipse at center, #0d1b2a 0%, #0a0e1a 100%);
+        border-radius: 10px;
+        padding: 20px;
+        overflow: hidden;
+    }
+    .map-overlay {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+    }
+    .hub {
+        position: absolute;
+        width: 10px; height: 10px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(0,212,255,0.25);
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+    }
+    .hub::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border: 1px solid var(--accent);
+        border-radius: 50%;
+        opacity: 0;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(2.5); opacity: 0; }
+    }
+    .hub-label {
+        position: absolute;
+        font-size: 10px;
+        color: var(--text);
+        background: rgba(10,14,26,0.8);
+        padding: 2px 6px;
+        border-radius: 4px;
+        transform: translate(-50%, 6px);
+        white-space: nowrap;
+    }
+    .route-line {
+        position: absolute;
+        height: 1px;
+        background: linear-gradient(90deg, var(--accent), transparent);
+        transform-origin: left center;
+        opacity: 0.5;
+    }
+
+    /* FORMS */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+    .form-control {
+        background: var(--bg-900);
+        border: 1px solid var(--border);
+        padding: 10px 12px;
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 13px;
+        font-family: inherit;
+    }
+    .form-control:focus { outline: none; border-color: var(--accent); }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        color: #001018;
+        padding: 11px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,212,255,0.3); }
+    .btn-secondary {
+        background: var(--bg-700);
+        color: var(--text);
+        padding: 11px 24px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    /* TRACKING TIMELINE */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        bottom: 8px;
+        width: 2px;
+        background: var(--border);
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-dot {
+        position: absolute;
+        left: -27px;
+        top: 4px;
+        width: 14px; height: 14px;
+        border-radius: 50%;
+        background: var(--bg-700);
+        border: 2px solid var(--border);
+    }
+    .timeline-item.active .timeline-dot {
+        background: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(0,212,255,0.2);
+    }
+    .timeline-item.done .timeline-dot {
+        background: var(--success);
+        border-color: var(--success);
+    }
+    .timeline-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .timeline-meta { font-size: 11px; color: var(--text-muted); }
+
+    /* WAREHOUSE CARDS */
+    .wh-card {
+        background: var(--bg-900);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 10px;
+    }
+    .wh-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 10px;
+    }
+    .wh-flag { font-size: 18px; margin-right: 8px; }
+    .wh-name { font-weight: 600; font-size: 13px; }
+    .wh-code { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+    .capacity-bar {
+        height: 6px;
+        background: var(--bg-700);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 6px;
+    }
+    .capacity-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--success), var(--warning));
+        transition: width 0.3s;
+    }
+    .capacity-fill.high { background: linear-gradient(90deg, var(--warning), var(--danger)); }
+    .wh-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 6px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-muted);
+    }
+
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--bg-700);
+        border-left: 4px solid var(--success);
+        padding: 14px 20px;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        z-index: 1000;
+        animation: slideIn 0.3s;
+        font-size: 13px;
+    }
+    @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+
+    .modal-overlay {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.7);
+        display: none;
+        align-items: center; justify-content: center;
+        z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+        background: var(--bg-800);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+        max-width: 560px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+    .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 20px;
+    }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <div class="logo-icon">🌐</div>
+        <div class="logo-text">
+            <h1>GLOBAL SCM</h1>
+            <p>Supply Chain OS</p>
+        </div>
+    </div>
+
+    <div class="nav-section-title">Operações</div>
+    <div class="nav-item active" onclick="showSection('dashboard', this)">
+        <span class="icon">📊</span> Command Center
+    </div>
+    <div class="nav-item" onclick="showSection('shipments', this)">
+        <span class="icon">📦</span> Embarques
+    </div>
+    <div class="nav-item" onclick="showSection('tracking', this)">
+        <span class="icon">🛰️</span> Rastreamento
+    </div>
+    <div class="nav-item" onclick="showSection('warehouses', this)">
+        <span class="icon">🏭</span> Armazéns Globais
+    </div>
+
+    <div class="nav-section-title">Parceiros</div>
+    <div class="nav-item" onclick="showSection('carriers', this)">
+        <span class="icon">🚢</span> Transportadoras
+    </div>
+    <div class="nav-item" onclick="showSection('suppliers', this)">
+        <span class="icon">🏢</span> Fornecedores
+    </div>
+
+    <div class="nav-section-title">Analytics</div>
+    <div class="nav-item" onclick="showSection('reports', this)">
+        <span class="icon">📈</span> Relatórios & KPIs
+    </div>
+    <div class="nav-item" onclick="showSection('exceptions', this)">
+        <span class="icon">⚠️</span> Gestão de Exceções
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <div>
+            <h2 id="pageTitle">Command Center</h2>
+            <div class="breadcrumb" id="breadcrumb">Supply Chain Management › Visão Global</div>
+        </div>
+        <div class="topbar-actions">
+            <input type="text" class="search-box" placeholder="🔍 Buscar BL, container, pedido...">
+            <div class="btn-icon" title="Notificações">
+                🔔<span class="badge-dot"></span>
+            </div>
+            <div class="btn-icon" title="Usuário">👤</div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="section active">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <span class="kpi-icon">📦</span>
+                <div class="kpi-label">Embarques Ativos</div>
+                <div class="kpi-value" id="kpiActive">0</div>
+                <div class="kpi-change up">▲ 12.4% vs. mês anterior</div>
+            </div>
+            <div class="kpi-card success">
+                <span class="kpi-icon">✅</span>
+                <div class="kpi-label">OTIF (On-Time In-Full)</div>
+                <div class="kpi-value" id="kpiOTIF">0%</div>
+                <div class="kpi-change up">▲ 3.2pp • Meta: 95%</div>
+            </div>
+            <div class="kpi-card warning">
+                <span class="kpi-icon">⏱️</span>
+                <div class="kpi-label">Lead Time Médio</div>
+                <div class="kpi-value" id="kpiLeadTime">0 d</div>
+                <div class="kpi-change down">▼ 1.8 dias</div>
+            </div>
+            <div class="kpi-card danger">
+                <span class="kpi-icon">⚠️</span>
+                <div class="kpi-label">Exceções Abertas</div>
+                <div class="kpi-value" id="kpiExceptions">0</div>
+                <div class="kpi-change down">Atrasos & Avarias</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🗺️ Rede Logística Global</div>
+                        <div class="panel-subtitle">Hubs ativos e rotas em tempo real</div>
+                    </div>
+                </div>
+                <div class="world-map-container" style="height: 380px;">
+                    <div class="map-overlay"></div>
+                    <svg width="100%" height="100%" viewBox="0 0 1000 400" preserveAspectRatio="none" style="position:absolute;inset:0;">
+                        <!-- Continentes estilizados -->
+                        <path d="M 150 120 Q 200 100 260 130 L 280 180 Q 250 220 200 210 Z" fill="#1f2937" opacity="0.6"/>
+                        <path d="M 220 230 Q 260 240 280 300 L 250 340 Q 220 320 210 270 Z" fill="#1f2937" opacity="0.6"/>
+                        <path d="M 420 100 Q 520 80 600 120 L 620 180 Q 560 200 480 190 Z" fill="#1f2937" opacity="0.6"/>
+                        <path d="M 440 200 Q 500 210 540 270 L 510 320 Q 460 310 440 260 Z" fill="#1f2937" opacity="0.6"/>
+                        <path d="M 620 120 Q 780 90 880 140 L 900 220 Q 820 250 720 230 Q 650 210 620 180 Z" fill="#1f2937" opacity="0.6"/>
+                        <path d="M 780 280 Q 850 270 900 310 L 880 340 Q 820 350 790 330 Z" fill="#1f2937" opacity="0.6"/>
+                    </svg>
+                    <div id="mapHubs"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📊 Volume por Modal</div>
+                        <div class="panel-subtitle">TEU / Toneladas por tipo de transporte</div>
+                    </div>
+                </div>
+                <canvas id="chartModal" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:20px;">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📋 Embarques Recentes</div>
+                        <div class="panel-subtitle">Últimas movimentações na rede</div>
+                    </div>
+                    <button class="btn-secondary" onclick="showSection('shipments', document.querySelectorAll('.nav-item')[1])">Ver todos →</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>BL / AWB</th>
+                            <th>Rota</th>
+                            <th>Modal</th>
+                            <th>Status</th>
+                            <th>ETA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentShipments"></tbody>
+                </table>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">⚠️ Alertas & Exceções</div>
+                        <div class="panel-subtitle">Eventos que requerem ação</div>
+                    </div>
+                </div>
+                <div id="alertsList"></div>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-top:20px;">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🌍 Performance por Corredor Logístico</div>
+                    <div class="panel-subtitle">Principais rotas internacionais</div>
+                </div>
+            </div>
+            <canvas id="chartCorridor" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- SHIPMENTS -->
+    <div id="shipments" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">➕ Novo Embarque</div>
+                    <div class="panel-subtitle">Registre uma nova operação na rede global</div>
+                </div>
+            </div>
+            <form id="shipmentForm" onsubmit="createShipment(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nº BL / AWB</label>
+                        <input type="text" class="form-control" id="blNumber" placeholder="Ex: MAEU1234567" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cliente / Shipper</label>
+                        <input type="text" class="form-control" id="customer" placeholder="Ex: Apple Inc." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Origem (Porto/Aeroporto)</label>
+                        <select class="form-control" id="origin" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Destino (Porto/Aeroporto)</label>
+                        <select class="form-control" id="destination" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Modal de Transporte</label>
+                        <select class="form-control" id="mode" required>
+                            <option value="sea">🚢 Marítimo (FCL/LCL)</option>
+                            <option value="air">✈️ Aéreo</option>
+                            <option value="road">🚛 Rodoviário</option>
+                            <option value="rail">🚆 Ferroviário</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Incoterm</label>
+                        <select class="form-control" id="incoterm" required>
+                            <option value="EXW">EXW - Ex Works</option>
+                            <option value="FOB" selected>FOB - Free On Board</option>
+                            <option value="CIF">CIF - Cost, Insurance & Freight</option>
+                            <option value="DDP">DDP - Delivered Duty Paid</option>
+                            <option value="DAP">DAP - Delivered At Place</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Operador Logístico</label>
+                        <select class="form-control" id="carrier" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso (kg)</label>
+                        <input type="number" class="form-control" id="weight" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor CIF (USD)</label>
+                        <input type="number" class="form-control" id="valueUSD" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" id="status" required>
+                            <option value="pending">📋 Aguardando Coleta</option>
+                            <option value="transit">🚢 Em Trânsito</option>
+                            <option value="customs">🛃 Em Despacho Aduaneiro</option>
+                            <option value="delivered">✅ Entregue</option>
+                            <option value="delayed">⚠️ Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group full" style="margin-top:16px;">
+                        <button type="submit" class="btn-primary">🚀 Registrar Embarque</button>
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('shipmentForm').reset()">Limpar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">📦 Embarques Cadastrados</div>
+                    <div class="panel-subtitle">Total: <span id="shipmentsCount">0</span> operações</div>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>BL / AWB</th>
+                            <th>Cliente</th>
+                            <th>Rota</th>
+                            <th>Modal</th>
+                            <th>Incoterm</th>
+                            <th>Operador</th>
+                            <th>Valor (USD)</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shipmentsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRACKING -->
+    <div id="tracking" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🛰️ Rastreamento de Embarque</div>
+                    <div class="panel-subtitle">Insira o BL, AWB ou Container</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;max-width:600px;">
+                <input type="text" class="form-control" id="trackInput" placeholder="Ex: MAEU1234567" style="flex:1;">
+                <button class="btn-primary" onclick="trackShipment()">Rastrear</button>
+            </div>
+        </div>
+        <div id="trackResult"></div>
+    </div>
+
+    <!-- WAREHOUSES -->
+    <div id="warehouses" class="section">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <span class="kpi-icon">🏭</span>
+                <div class="kpi-label">Armazéns Ativos</div>
+                <div class="kpi-value" id="whCount">0</div>
+                <div class="kpi-change">Em 14 países</div>
+            </div>
+            <div class="kpi-card success">
+                <span class="kpi-icon">📊</span>
+                <div class="kpi-label">Capacidade Total</div>
+                <div class="kpi-value" id="whCapacity">0 m²</div>
+                <div class="kpi-change up">Ocupação média: 74%</div>
+            </div>
+            <div class="kpi-card warning">
+                <span class="kpi-icon">📦</span>
+                <div class="kpi-label">SKUs em Estoque</div>
+                <div class="kpi-value" id="whSKUs">0</div>
+                <div class="kpi-change">Inventário global</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🌐 Rede de Armazéns Globais</div>
+                    <div class="panel-subtitle">Distribuição estratégica por região</div>
+                </div>
+            </div>
+            <div id="warehousesList"></div>
+        </div>
+    </div>
+
+    <!-- CARRIERS -->
+    <div id="carriers" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🚢 Operadores Logísticos Globais</div>
+                    <div class="panel-subtitle">Parceiros de transporte multimodal</div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operador</th>
+                        <th>HQ</th>
+                        <th>Modal</th>
+                        <th>Frota</th>
+                        <th>Cobertura</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody id="carriersTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SUPPLIERS -->
+    <div id="suppliers" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🏢 Fornecedores Globais</div>
+                    <div class="panel-subtitle">Base de suppliers estratégicos</div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Empresa</th>
+                        <th>País</th>
+                        <th>Setor</th>
+                        <th>Tier</th>
+                        <th>Lead Time</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="suppliersTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="reports" class="section">
+        <div class="grid-3">
+            <div class="panel">
+                <div class="panel-title">📈 Volume Movimentado (TEU)</div>
+                <canvas id="reportTEU"></canvas>
+            </div>
+            <div class="panel">
+                <div class="panel-title">💰 Receita por Modal</div>
+                <canvas id="reportRevenue"></canvas>
+            </div>
+            <div class="panel">
+                <div class="panel-title">🎯 OTIF por Operador</div>
+                <canvas id="reportOTIF"></canvas>
+            </div>
+        </div>
+        <div class="panel" style="margin-top:20px;">
+            <div class="panel-title" style="margin-bottom:16px;">📊 Análise de Custos Logísticos</div>
+            <canvas id="reportCosts" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- EXCEPTIONS -->
+    <div id="exceptions" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">⚠️ Central de Gestão de Exceções</div>
+                    <div class="panel-subtitle">Desvios operacionais que exigem intervenção</div>
+                </div>
+            </div>
+            <div id="exceptionsList"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Detalhes</h3>
+            <button class="close-btn" onclick="closeModal()">✕</button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+// =============== DADOS GLOBAIS ===============
+const GLOBAL_DATA = {
+    hubs: [
+        { code: 'RTM', name: 'Rotterdam', country: '🇳🇱', x: 48, y: 28, type: 'Porto Marítimo', teu: '14.5M TEU/ano' },
+        { code: 'SIN', name: 'Singapura', country: '🇸🇬', x: 78, y: 58, type: 'Hub Marítimo', teu: '37.2M TEU/ano' },
+        { code: 'SHA', name: 'Shanghai', country: '🇨🇳', x: 82, y: 38, type: 'Porto Marítimo', teu: '47M TEU/ano' },
+        { code: 'LAX', name: 'Los Angeles', country: '🇺🇸', x: 14, y: 38, type: 'Porto Marítimo', teu: '9.9M TEU/ano' },
+        { code: 'MEM', name: 'Memphis', country: '🇺🇸', x: 22, y: 40, type: 'Hub Aéreo (FedEx)', teu: 'SuperHub' },
+        { code: 'DXB', name: 'Dubai', country: '🇦🇪', x: 62, y: 42, type: 'Hub Multimodal', teu: 'Jebel Ali' },
+        { code: 'SSZ', name: 'Santos', country: '🇧🇷', x: 30, y: 70, type: 'Porto Marítimo', teu: '4.1M TEU/ano' },
+        { code: 'FRA', name: 'Frankfurt', country: '🇩🇪', x: 50, y: 26, type: 'Hub Aéreo', teu: 'Cargo Center' },
+        { code: 'NRT', name: 'Tokyo', country: '🇯🇵', x: 88, y: 35, type: 'Porto/Aéreo', teu: 'Narita+Yokohama' },
+        { code: 'GRU', name: 'São Paulo', country: '🇧🇷', x: 31, y: 68, type: 'Aeroporto Cargo', teu: 'Viracopos+GRU' }
+    ],
+    carriers: [
+        { name: 'Maersk', hq: '🇩🇰 Copenhagen', mode: 'Marítimo', fleet: '730+ navios', coverage: '130 países', otif: 94 },
+        { name: 'MSC', hq: '🇨🇭 Geneva', mode: 'Marítimo', fleet: '800+ navios', coverage: '155 países', otif: 92 },
+        { name: 'DHL Global Forwarding', hq: '🇩🇪 Bonn', mode: 'Multimodal', fleet: 'Global', coverage: '220+ países', otif: 96 },
+        { name: 'Kuehne+Nagel', hq: '🇨🇭 Schindellegi', mode: 'Freight Forwarding', fleet: 'Global', coverage: '100 países', otif: 95 },
+        { name: 'DB Schenker', hq: '🇩🇪 Essen', mode: 'Multimodal', fleet: 'Global', coverage: '140 países', otif: 93 },
+        { name: 'FedEx Express', hq: '🇺🇸 Memphis', mode: 'Aéreo', fleet: '680+ aeronaves', coverage: '220+ países', otif: 97 },
+        { name: 'CMA CGM', hq: '🇫🇷 Marseille', mode: 'Marítimo', fleet: '600+ navios', coverage: '420 portos', otif: 91 },
+        { name: 'UPS Supply Chain', hq: '🇺🇸 Atlanta', mode: 'Multimodal', fleet: '590+ aeronaves', coverage: '200+ países', otif: 96 }
+    ],
+    suppliers: [
+        { name: 'Foxconn', country: '🇨🇳 China', sector: 'Eletrônicos', tier: 'Tier 1', lead: '28d', rating: 4.7 },
+        { name: 'TSMC', country: '🇹🇼 Taiwan', sector: 'Semicondutores', tier: 'Tier 1', lead: '90d', rating: 4.9 },
+        { name: 'Samsung SDI', country: '🇰🇷 Coreia do Sul', sector: 'Baterias', tier: 'Tier 1', lead: '45d', rating: 4.8 },
+        { name: 'Bosch', country: '🇩🇪 Alemanha', sector: 'Autopeças', tier: 'Tier 1', lead: '21d', rating: 4.6 },
+        { name: 'Toyota Tsusho', country: '🇯🇵 Japão', sector: 'Automotivo', tier: 'Tier 1', lead: '35d', rating: 4.8 },
+        { name: 'Flex Ltd', country: '🇸🇬 Singapura', sector: 'EMS', tier: 'Tier 2', lead: '24d', rating: 4.5 },
+        { name: 'Pegatron', country: '🇹🇼 Taiwan', sector: 'Eletrônicos', tier: 'Tier 1', lead: '32d', rating: 4.4 }
+    ],
+    warehouses: [
+        { city: 'Rotterdam', country: '🇳🇱', code: 'RTM-DC01', area: 85000, capacity: 82, skus: 42500 },
+        { city: 'Singapura', country: '🇸🇬', code: 'SIN-DC01', area: 65000, capacity: 91, skus: 38200 },
+        { city: 'Cajamar (SP)', country: '🇧🇷', code: 'GRU-DC01', area: 120000, capacity: 76, skus: 68500 },
+        { city: 'Memphis', country: '🇺🇸', code: 'MEM-HUB', area: 95000, capacity: 68, skus: 52100 },
+        { city: 'Frankfurt', country: '🇩🇪', code: 'FRA-DC01', area: 48000, capacity: 71, skus: 28400 },
+        { city: 'Dubai', country: '🇦🇪', code: 'DXB-DC01', area: 72000, capacity: 88, skus: 41200 },
+        { city: 'Shanghai', country: '🇨🇳', code: 'SHA-DC01', area: 155000, capacity: 79, skus: 95800 },
+        { city: 'Extrema (MG)', country: '🇧🇷', code: 'CNF-DC01', area: 88000, capacity: 65, skus: 47600 }
+    ],
+    incoterms: {
+        'EXW': { name: 'Ex Works', risk: 'Comprador' },
+        'FOB': { name: 'Free On Board', risk: 'Dividido' },
+        'CIF': { name: 'Cost, Insurance & Freight', risk: 'Vendedor até destino' },
+        'DDP': { name: 'Delivered Duty Paid', risk: 'Vendedor total' },
+        'DAP': { name: 'Delivered At Place', risk: 'Vendedor até local' }
+    }
+};
+
+const INITIAL_SHIPMENTS = [
+    { id: 'SH001', bl: 'MAEU8745123', customer: 'Apple Inc.', origin: 'SHA', destination: 'LAX', mode: 'sea', incoterm: 'FOB', carrier: 'Maersk', weight: 12500, value: 850000, status: 'transit', eta: 18, created: Date.now() - 86400000*5 },
+    { id: 'SH002', bl: 'SIN-100293', customer: 'Samsung Electronics', origin: 'NRT', destination: 'RTM', mode: 'sea', incoterm: 'CIF', carrier: 'MSC', weight: 8200, value: 620000, status: 'transit', eta: 12, created: Date.now() - 86400000*3 },
+    { id: 'SH003', bl: 'AWB-172-9845', customer: 'Dell Technologies', origin: 'MEM', destination: 'GRU', mode: 'air', incoterm: 'DDP', carrier: 'FedEx Express', weight: 450, value: 185000, status: 'customs', eta: 2, created: Date.now() - 86400000*1 },
+    { id: 'SH004', bl: 'HLCU5567234', customer: 'Volkswagen AG', origin: 'FRA', destination: 'SSZ', mode: 'sea', incoterm: 'CIF', carrier: 'Hapag-Lloyd', weight: 22000, value: 1250000, status: 'delayed', eta: 28, created: Date.now() - 86400000*15 },
+    { id: 'SH005', bl: 'AWB-297-4412', customer: 'Pfizer', origin: 'FRA', destination: 'JFK', mode: 'air', incoterm: 'DAP', carrier: 'DHL Global Forwarding', weight: 890, value: 2400000, status: 'transit', eta: 1, created: Date.now() - 86400000*0.5 },
+    { id: 'SH006', bl: 'CMAU4412890', customer: 'Nike', origin: 'SIN', destination: 'LAX', mode: 'sea', incoterm: 'FOB', carrier: 'CMA CGM', weight: 18500, value: 920000, status: 'delivered', eta: 0, created: Date.now() - 86400000*10 }
+];
+
+let shipments = JSON.parse(localStorage.getItem('scm_shipments')) || INITIAL_SHIPMENTS;
+let charts = {};
+
+// =============== NAVEGAÇÃO ===============
+function showSection(id, navItem) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (navItem) navItem.classList.add('active');
+
+    const titles = {
+        dashboard: ['Command Center', 'Supply Chain Management › Visão Global'],
+        shipments: ['Gestão de Embarques', 'Operações › Shipments & Bookings'],
+        tracking: ['Rastreamento Global', 'Operações › Track & Trace'],
+        warehouses: ['Armazéns Globais', 'Operações › Warehouses & DCs'],
+        carriers: ['Operadores Logísticos', 'Parceiros › Carriers'],
+        suppliers: ['Fornecedores Globais', 'Parceiros › Suppliers'],
+        reports: ['Analytics & BI', 'Relatórios › KPIs de Supply Chain'],
+        exceptions: ['Gestão de Exceções', 'Operações › Incidentes & Desvios']
+    };
+    document.getElementById('pageTitle').textContent = titles[id][0];
+    document.getElementById('breadcrumb').textContent = titles[id][1];
+
+    if (id === 'reports') setTimeout(renderReports, 100);
+}
+
+// =============== DASHBOARD ===============
+function renderDashboard() {
+    const active = shipments.filter(s => s.status !== 'delivered').length;
+    const delivered = shipments.filter(s => s.status === 'delivered').length;
+    const delayed = shipments.filter(s => s.status === 'delayed').length;
+    const otif = shipments.length > 0 ? Math.round(((shipments.length - delayed) / shipments.length) * 100) : 0;
+    const avgLead = shipments.length > 0 ? Math.round(shipments.reduce((s, sh) => s + sh.eta, 0) / shipments.length) : 0;
+
+    document.getElementById('kpiActive').textContent = active;
+    document.getElementById('kpiOTIF').textContent = otif + '%';
+    document.getElementById('kpiLeadTime').textContent = avgLead + ' d';
+    document.getElementById('kpiExceptions').textContent = delayed;
+
+    renderMap();
+    renderRecentShipments();
+    renderAlerts();
+    renderCharts();
+}
+
+function renderMap() {
+    const container = document.getElementById('mapHubs');
+    container.innerHTML = '';
+    GLOBAL_DATA.hubs.forEach(hub => {
+        const dot = document.createElement('div');
+        dot.className = 'hub';
+        dot.style.left = hub.x + '%';
+        dot.style.top = hub.y + '%';
+        dot.title = `${hub.country} ${hub.name} - ${hub.type}`;
+
+        const label = document.createElement('div');
+        label.className = 'hub-label';
+        label.style.left = hub.x + '%';
+        label.style.top = hub.y + '%';
+        label.textContent = `${hub.country} ${hub.code}`;
+
+        container.appendChild(dot);
+        container.appendChild(label);
+    });
+}
+
+function renderRecentShipments() {
+    const tbody = document.getElementById('recentShipments');
+    const recent = shipments.slice(0, 5);
+    if (recent.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sem embarques</td></tr>';
+        return;
+    }
+    tbody.innerHTML = recent.map(s => {
+        const orig = GLOBAL_DATA.hubs.find(h => h.code === s.origin);
+        const dest = GLOBAL_DATA.hubs.find(h => h.code === s.destination);
+        return `<tr>
+            <td style="font-family:monospace;color:var(--accent);font-weight:600;">${s.bl}</td>
+            <td>${orig?.country || ''} ${orig?.name || s.origin} → ${dest?.country || ''} ${dest?.name || s.destination}</td>
+            <td><span class="mode-badge mode-${s.mode}">${getModeName(s.mode)}</span></td>
+            <td>${getStatusBadge(s.status)}</td>
+            <td>${s.eta > 0 ? s.eta + 'd' : '✓'}</td>
+        </tr>`;
+    }).join('');
+}
+
+function renderAlerts() {
+    const container = document.getElementById('alertsList');
+    const delayed = shipments.filter(s => s.status === 'delayed');
+    const customs = shipments.filter(s => s.status === 'customs');
+
+    let html = '';
+    delayed.forEach(s => {
+        html += `<div style="padding:12px;border-left:3px solid var(--danger);background:rgba(239,68,68,0.08);border-radius:6px;margin-bottom:10px;">
+            <div style="font-weight:600;font-size:13px;">⚠️ Atraso Crítico: ${s.bl}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${s.customer} • ${s.carrier} • ETA original comprometido</div>
+        </div>`;
+    });
+    customs.forEach(s => {
+        html += `<div style="padding:12px;border-left:3px solid var(--warning);background:rgba(245,158,11,0.08);border-radius:6px;margin-bottom:10px;">
+            <div style="font-weight:600;font-size:13px;">🛃 Em Despacho Aduaneiro: ${s.bl}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${s.customer} • Aguardando liberação</div>
+        </div>`;
+    });
+    if (!html) html = '<div class="empty-state">✅ Nenhuma exceção ativa no momento</div>';
+    container.innerHTML = html;
+}
+
+function renderCharts() {
+    if (charts.modal) charts.modal.destroy();
+    const modes = { sea: 0, air: 0, road: 0, rail: 0 };
+    shipments.forEach(s => modes[s.mode] = (modes[s.mode] || 0) + s.weight);
+
+    charts.modal = new Chart(document.getElementById('chartModal'), {
+        type: 'bar',
+        data: {
+            labels: ['Marítimo', 'Aéreo', 'Rodoviário', 'Ferroviário'],
+            datasets: [{
+                label: 'Peso (kg)',
+                data: [modes.sea, modes.air, modes.road, modes.rail],
+                backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981', '#a855f7'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+            }
+        }
+    });
+
+    if (charts.corridor) charts.corridor.destroy();
+    const corridors = [
+        { name: 'Asia → North America', teu: 2850 },
+        { name: 'Asia → Europe', teu: 2140 },
+        { name: 'Europe → LATAM', teu: 980 },
+        { name: 'Intra-Asia', teu: 1650 },
+        { name: 'Transatlantic', teu: 720 }
+    ];
+    charts.corridor = new Chart(document.getElementById('chartCorridor'), {
+        type: 'bar',
+        data: {
+            labels: corridors.map(c => c.name),
+            datasets: [{
+                label: 'TEU (mil)',
+                data: corridors.map(c => c.teu),
+                backgroundColor: '#00d4ff',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                y: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+// =============== UTILIDADES ===============
+function getModeName(m) {
+    return { sea: 'SEA', air: 'AIR', road: 'ROAD', rail: 'RAIL' }[m] || m;
+}
+
+function getStatusBadge(status) {
+    const map = {
+        pending: ['pending', '📋 Aguardando'],
+        transit: ['transit', '🚢 Em Trânsito'],
+        customs: ['customs', '🛃 Alfândega'],
+        delivered: ['delivered', '✅ Entregue'],
+        delayed: ['delayed', '⚠️ Atrasado']
+    };
+    const [cls, label] = map[status] || ['pending', status];
+    return `<span class="badge ${cls}"><span class="badge-dot-sm"></span>${label}</span>`;
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+function saveShipments() {
+    localStorage.setItem('scm_shipments', JSON.stringify(shipments));
+}
+
+// =============== EMBARQUES ===============
+function populateForms() {
+    const origins = document.getElementById('origin');
+    const dests = document.getElementById('destination');
+    const carriers = document.getElementById('carrier');
+
+    GLOBAL_DATA.hubs.forEach(h => {
+        origins.innerHTML += `<option value="${h.code}">${h.country} ${h.name} (${h.code})</option>`;
+        dests.innerHTML += `<option value="${h.code}">${h.country} ${h.name} (${h.code})</option>`;
+    });
+    GLOBAL_DATA.carriers.forEach(c => {
+        carriers.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+    });
+}
+
+function createShipment(e) {
+    e.preventDefault();
+    const newS = {
+        id: 'SH' + String(shipments.length + 1).padStart(3, '0'),
+        bl: document.getElementById('blNumber').value,
+        customer: document.getElementById('customer').value,
+        origin: document.getElementById('origin').value,
+        destination: document.getElementById('destination').value,
+        mode: document.getElementById('mode').value,
+        incoterm: document.getElementById('incoterm').value,
+        carrier: document.getElementById('carrier').value,
+        weight: parseFloat(document.getElementById('weight').value),
+        value: parseFloat(document.getElementById('valueUSD').value),
+        status: document.getElementById('status').value,
+        eta: Math.floor(Math.random() * 30) + 3,
+        created: Date.now()
+    };
+    shipments.unshift(newS);
+    saveShipments();
+    e.target.reset();
+    showToast('✅ Embarque registrado na rede global');
+    renderShipmentsTable();
+    renderDashboard();
+}
+
+function renderShipmentsTable() {
+    const tbody = document.getElementById('shipmentsTable');
+    document.getElementById('shipmentsCount').textContent = shipments.length;
+    if (shipments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-state">Nenhum embarque cadastrado</td></tr>';
+        return;
+    }
+    tbody.innerHTML = shipments.map(s => {
+        const orig = GLOBAL_DATA.hubs.find(h => h.code === s.origin);
+        const dest = GLOBAL_DATA.hubs.find(h => h.code === s.destination);
+        return `<tr>
+            <td style="font-family:monospace;color:var(--accent);font-weight:600;">${s.bl}</td>
+            <td>${s.customer}</td>
+            <td>${orig?.country || ''} ${orig?.name || s.origin} → ${dest?.country || ''} ${dest?.name || s.destination}</td>
+            <td><span class="mode-badge mode-${s.mode}">${getModeName(s.mode)}</span></td>
+            <td><strong>${s.incoterm}</strong></td>
+            <td>${s.carrier}</td>
+            <td>$${s.value.toLocaleString()}</td>
+            <td>${getStatusBadge(s.status)}</td>
+            <td><button class="btn-secondary" onclick="viewShipmentDetails('${s.id}')" style="padding:4px 10px;font-size:11px;">Detalhes</button></td>
+        </tr>`;
+    }).join('');
+}
+
+function viewShipmentDetails(id) {
+    const s = shipments.find(x => x.id === id);
+    if (!s) return;
+    const orig = GLOBAL_DATA.hubs.find(h => h.code === s.origin);
+    const dest = GLOBAL_DATA.hubs.find(h => h.code === s.destination);
+
+    document.getElementById('modalTitle').textContent = `📦 ${s.bl}`;
+    document.getElementById('modalBody').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+            <div><div style="font-size:11px;color:var(--text-muted);">CLIENTE</div><div>${s.customer}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">OPERADOR</div><div>${s.carrier}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">ORIGEM</div><div>${orig?.country} ${orig?.name}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">DESTINO</div><div>${dest?.country} ${dest?.name}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">MODAL</div><div>${getModeName(s.mode)}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">INCOTERM</div><div>${s.incoterm}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">PESO</div><div>${s.weight.toLocaleString()} kg</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">VALOR CIF</div><div>$${s.value.toLocaleString()}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">STATUS</div><div>${getStatusBadge(s.status)}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">ETA</div><div>${s.eta > 0 ? s.eta + ' dias' : 'Entregue'}</div></div>
+        </div>
+    `;
+    document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+}
+
+// =============== RASTREAMENTO ===============
+function trackShipment() {
+    const code = document.getElementById('trackInput').value.trim().toUpperCase();
+    const s = shipments.find(x => x.bl.toUpperCase() === code);
+    const container = document.getElementById('trackResult');
+
+    if (!s) {
+        container.innerHTML = `<div class="panel"><div class="empty-state">❌ Embarque "${code}" não encontrado na rede.</div></div>`;
+        return;
+    }
+
+    const orig = GLOBAL_DATA.hubs.find(h => h.code === s.origin);
+    const dest = GLOBAL_DATA.hubs.find(h => h.code === s.destination);
+
+    const events = [
+        { done: true, title: '📋 Booking confirmado', meta: 'Reserva emitida junto ao carrier', time: 'D-0' },
+        { done: true, title: '🏭 Coleta realizada', meta: `Carga coletada em ${orig?.name}`, time: 'D+2' },
+        { done: s.status !== 'pending', title: '🛃 Despacho aduaneiro origem', meta: 'Liberação de exportação concluída', time: 'D+4' },
+        { done: ['transit', 'customs', 'delivered', 'delayed'].includes(s.status), title: `🚢 ${getModeName(s.mode)} em rota`, meta: `${orig?.name} → ${dest?.name}`, time: 'D+5' },
+        { done: s.status === 'customs' || s.status === 'delivered', title: '🛃 Chegada no destino', meta: `Em despacho em ${dest?.name}`, time: `D+${s.eta-2}` },
+        { done: s.status === 'delivered', title: '✅ Entrega finalizada', meta: 'POD assinado pelo consignatário', time: `D+${s.eta}` }
+    ];
+
+    const statusColors = {
+        transit: 'var(--accent)',
+        customs: 'var(--warning)',
+        delivered: 'var(--success)',
+        delayed: 'var(--danger)',
+        pending: 'var(--text-muted)'
+    };
+
+    container.innerHTML = `
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🛰️ Rastreamento: ${s.bl}</div>
+                    <div class="panel-subtitle">${s.customer} • ${s.carrier} • ${s.incoterm}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:11px;color:var(--text-muted);">STATUS ATUAL</div>
+                    <div style="font-size:18px;font-weight:700;color:${statusColors[s.status]}">${s.status.toUpperCase()}</div>
+                </div>
+            </div>
+            <div style="padding:18px;background:var(--bg-900);border-radius:10px;margin-bottom:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div><div style="font-size:11px;color:var(--text-muted);">ORIGEM</div><div>${orig?.country} ${orig?.name}</div></div>
+                <div style="font-size:24px;color:var(--accent);">→</div>
+                <div><div style="font-size:11px;color:var(--text-muted);">DESTINO</div><div>${dest?.country} ${dest?.name}</div></div>
+                <div><div style="font-size:11px;color:var(--text-muted);">MODAL</div><div>${getModeName(s.mode)}</div></div>
+                <div><div style="font-size:11px;color:var(--text-muted);">PESO</div><div>${s.weight.toLocaleString()} kg</div></div>
+                <div><div style="font-size:11px;color:var(--text-muted);">VALOR</div><div>$${s.value.toLocaleString()}</div></div>
+            </div>
+            <h4 style="margin-bottom:14px;font-size:13px;">Linha do Tempo</h4>
+            <div class="timeline">
+                ${events.map((e, i) => `
+                    <div class="timeline-item ${e.done ? (i === events.filter(x => x.done).length - 1 ? 'active' : 'done') : ''}">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-title">${e.title}</div>
+                        <div class="timeline-meta">${e.meta} • ${e.time}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// =============== WAREHOUSES ===============
+function renderWarehouses() {
+    const container = document.getElementById('warehousesList');
+    document.getElementById('whCount').textContent = GLOBAL_DATA.warehouses.length;
+    const totalArea = GLOBAL_DATA.warehouses.reduce((s, w) => s + w.area, 0);
+    const totalSKUs = GLOBAL_DATA.warehouses.reduce((s, w) => s + w.skus, 0);
+    document.getElementById('whCapacity').textContent = totalArea.toLocaleString() + ' m²';
+    document.getElementById('whSKUs').textContent = totalSKUs.toLocaleString();
+
+    container.innerHTML = GLOBAL_DATA.warehouses.map(w => `
+        <div class="wh-card">
+            <div class="wh-header">
+                <div>
+                    <span class="wh-flag">${w.country}</span>
+                    <span class="wh-name">${w.city}</span>
+                    <div class="wh-code">${w.code}</div>
+                </div>
+                <span class="badge ${w.capacity > 85 ? 'delayed' : w.capacity > 70 ? 'customs' : 'delivered'}">
+                    <span class="badge-dot-sm"></span>
+                    ${w.capacity}% ocupado
+                </span>
+            </div>
+            <div class="capacity-bar">
+                <div class="capacity-fill ${w.capacity > 85 ? 'high' : ''}" style="width:${w.capacity}%"></div>
+            </div>
+            <div class="wh-stats">
+                <span>📐 ${w.area.toLocaleString()} m²</span>
+                <span>📦 ${w.skus.toLocaleString()} SKUs</span>
+                <span>🚛 ${(100 - w.capacity)}% livre</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// =============== CARRIERS ===============
+function renderCarriers() {
+    const tbody = document.getElementById('carriersTable');
+    tbody.innerHTML = GLOBAL_DATA.carriers.map(c => `
+        <tr>
+            <td><strong>${c.name}</strong></td>
+            <td>${c.hq}</td>
+            <td><span class="badge pending">${c.mode}</span></td>
+            <td>${c.fleet}</td>
+            <td>${c.coverage}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;height:6px;background:var(--bg-900);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${c.otif}%;background:linear-gradient(90deg,${c.otif >= 95 ? 'var(--success)' : c.otif >= 92 ? 'var(--warning)' : 'var(--danger)'});"></div>
+                    </div>
+                    <strong style="font-size:12px;">${c.otif}%</strong>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// =============== SUPPLIERS ===============
+function renderSuppliers() {
+    const tbody = document.getElementById('suppliersTable');
+    tbody.innerHTML = GLOBAL_DATA.suppliers.map(s => `
+        <tr>
+            <td><strong>${s.name}</strong></td>
+            <td>${s.country}</td>
+            <td>${s.sector}</td>
+            <td><span class="badge ${s.tier === 'Tier 1' ? 'transit' : 'pending'}">${s.tier}</span></td>
+            <td>${s.lead}</td>
+            <td>
+                <span style="color:#fbbf24;">${'★'.repeat(Math.floor(s.rating))}${'☆'.repeat(5 - Math.floor(s.rating))}</span>
+                <strong style="margin-left:6px;">${s.rating}</strong>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// =============== REPORTS ===============
+function renderReports() {
+    if (charts.teu) charts.teu.destroy();
+    if (charts.revenue) charts.revenue.destroy();
+    if (charts.otifChart) charts.otifChart.destroy();
+    if (charts.costs) charts.costs.destroy();
+
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const teuData = [420, 485, 510, 495, 540, 612, 678, 645, 720, 698, 760, 820];
+
+    charts.teu = new Chart(document.getElementById('reportTEU'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'TEU (mil)',
+                data: teuData,
+                borderColor: '#00d4ff',
+                backgroundColor: 'rgba(0,212,255,0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+            }
+        }
+    });
+
+    charts.revenue = new Chart(document.getElementById('reportRevenue'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Marítimo', 'Aéreo', 'Rodoviário', 'Ferroviário'],
+            datasets: [{
+                data: [48, 32, 14, 6],
+                backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981', '#a855f7']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 } } } }
+        }
+    });
+
+    charts.otifChart = new Chart(document.getElementById('reportOTIF'), {
+        type: 'bar',
+        data: {
+            labels: GLOBAL_DATA.carriers.slice(0, 5).map(c => c.name.split(' ')[0]),
+            datasets: [{
+                label: 'OTIF %',
+                data: GLOBAL_DATA.carriers.slice(0, 5).map(c => c.otif),
+                backgroundColor: '#10b981',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { min: 85, max: 100, ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+                x: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { display: false } }
+            }
+        }
+    });
+
+    charts.costs = new Chart(document.getElementById('reportCosts'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [
+                { label: 'Frete Marítimo', data: [120, 135, 128, 145, 152, 168, 175, 180, 172, 185, 195, 210], borderColor: '#0ea5e9', tension: 0.3 },
+                { label: 'Frete Aéreo', data: [85, 92, 98, 105, 112, 118, 125, 122, 128, 135, 142, 150], borderColor: '#f59e0b', tension: 0.3 },
+                { label: 'Armazenagem', data: [45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 82], borderColor: '#10b981', tension: 0.3 },
+                { label: 'Despacho Aduaneiro', data: [28, 32, 30, 35, 38, 42, 45, 48, 50, 52, 55, 58], borderColor: '#a855f7', tension: 0.3 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 11 } } } },
+            scales: {
+                y: { ticks: { color: '#9ca3af', callback: v => '$' + v + 'k' }, grid: { color: '#1f2937' } },
+                x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+// =============== EXCEPTIONS ===============
+function renderExceptions() {
+    const container = document.getElementById('exceptionsList');
+    const delayed = shipments.filter(s => s.status === 'delayed');
+    const customs = shipments.filter(s => s.status === 'customs');
+
+    if (delayed.length === 0 && customs.length === 0) {
+        container.innerHTML = '<div class="empty-state">✅ Nenhuma exceção ativa no momento. Operação dentro dos parâmetros normais.</div>';
+        return;
+    }
+
+    let html = '';
+    delayed.forEach(s => {
+        const orig = GLOBAL_DATA.hubs.find(h => h.code === s.origin);
+        const dest = GLOBAL_DATA.hubs.find(h => h.code === s.destination);
+        html += `<div style="padding:18px;background:rgba(239,68,68,0.05);border-left:4px solid var(--danger);border-radius:8px;margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:10px;">
+                <div>
+                    <div style="font-weight:700;color:var(--danger);margin-bottom:4px;">🚨 ATRASO CRÍTICO</div>
+                    <div style="font-family:monospace;color:var(--accent);font-weight:600;">${s.bl}</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${s.customer} • ${orig?.name} → ${dest?.name}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:11px;color:var(--text-muted);">SLA QUEBRADO</div>
+                    <div style="color:var(--danger);font-weight:700;">+${Math.floor(Math.random() * 5) + 2} dias</div>
+                </div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;">
+                <button class="btn-secondary" style="font-size:11px;padding:6px 12px;">📞 Contatar Carrier</button>
+                <button class="btn-secondary" style="font-size:11px;padding:6px 12px;">🔄 Replanejar Rota</button>
+                <button class="btn-primary" style="font-size:11px;padding:6px 12px;">📧 Notificar Cliente</button>
+            </div>
+        </div>`;
+    });
+    customs.forEach(s => {
+        html += `<div style="padding:18px;background:rgba(245,158,11,0.05);border-left:4px solid var(--warning);border-radius:8px;margin-bottom:12px;">
+            <div style="font-weight:700;color:var(--warning);margin-bottom:4px;">🛃 DESPACHO ADUANEIRO PENDENTE</div>
+            <div style="font-family:monospace;color:var(--accent);font-weight:600;">${s.bl}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${s.customer} • Aguardando liberação fiscal</div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+// =============== INIT ===============
+window.addEventListener('load', () => {
+    populateForms();
+    renderDashboard();
+    renderShipmentsTable();
+    renderWarehouses();
+    renderCarriers();
+    renderSuppliers();
+    renderExceptions();
+});
+
+document.getElementById('modal').addEventListener('click', e => {
+    if (e.target.id === 'modal') closeModal();
+});
+</script>
+
+</body>
+</html>

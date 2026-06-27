@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global SCM • Supply Chain Management System</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+        --bg-900: #0a0e1a;
+        --bg-850: #0d1321;
+        --bg-800: #111827;
+        --bg-750: #161f2e;
+        --bg-700: #1f2937;
+        --bg-600: #374151;
+        --accent: #00d4ff;
+        --accent-2: #0ea5e9;
+        --accent-3: #06b6d4;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #8b5cf6;
+        --text: #e5e7eb;
+        --text-muted: #9ca3af;
+        --border: #1f2937;
+        --glass: rgba(17, 24, 39, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.06);
+    }
+    
+    body {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        background: var(--bg-900);
+        color: var(--text);
+        display: flex;
+        min-height: 100vh;
+        font-size: 14px;
+        overflow-x: hidden;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-900); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-700); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--bg-600); }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #0d1321 0%, #0a0e1a 100%);
+        padding: 20px 14px;
+        border-right: 1px solid var(--border);
+        position: fixed;
+        top: 0; left: 0;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 100;
+        transition: transform 0.3s ease;
+    }
+    .sidebar.collapsed { transform: translateX(-100%); }
+    
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+    .logo-icon {
+        width: 36px; height: 36px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 15px rgba(0,212,255,0.25);
+    }
+    .logo-text h1 { font-size: 15px; color: var(--text); font-weight: 800; letter-spacing: 0.5px; }
+    .logo-text p { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
+
+    .nav-section-title {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+        margin: 18px 8px 8px;
+        font-weight: 600;
+    }
+    .nav-item {
+        padding: 10px 12px;
+        margin: 2px 0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: var(--text-muted);
+        position: relative;
+        overflow: hidden;
+    }
+    .nav-item::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 3px;
+        background: var(--accent);
+        transform: scaleY(0);
+        transition: transform 0.25s ease;
+        border-radius: 0 3px 3px 0;
+    }
+    .nav-item:hover { 
+        background: rgba(31, 41, 55, 0.6); 
+        color: var(--text); 
+        transform: translateX(2px);
+    }
+    .nav-item.active {
+        background: linear-gradient(90deg, rgba(0,212,255,0.12), transparent);
+        color: var(--accent);
+    }
+    .nav-item.active::before { transform: scaleY(1); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        font-size: 11px;
+        color: var(--text-muted);
+        text-align: center;
+    }
+
+    /* ===== MOBILE MENU TOGGLE ===== */
+    .menu-toggle {
+        display: none;
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 101;
+        width: 40px; height: 40px;
+        background: var(--bg-800);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 18px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 99;
+        backdrop-filter: blur(4px);
+    }
+    .sidebar-overlay.active { display: block; }
+
+    /* ===== MAIN ===== */
+    .main { 
+        flex: 1; 
+        margin-left: 260px;
+        padding: 24px 32px; 
+        overflow-x: hidden;
+        transition: margin-left 0.3s ease;
+    }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .topbar h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .topbar .breadcrumb { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .topbar-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    
+    .search-box {
+        background: var(--bg-800);
+        border: 1px solid var(--border);
+        padding: 9px 14px;
+        border-radius: 10px;
+        color: var(--text);
+        width: 280px;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+    .search-box:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,0.1); }
+    
+    .btn-icon {
+        width: 38px; height: 38px;
+        background: var(--bg-800);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+        font-size: 16px;
+    }
+    .btn-icon:hover { background: var(--bg-700); border-color: var(--accent); transform: translateY(-1px); }
+    .badge-dot {
+        position: absolute; top: 7px; right: 7px;
+        width: 8px; height: 8px;
+        background: var(--danger);
+        border-radius: 50%;
+        border: 2px solid var(--bg-900);
+        animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    /* ===== SECTIONS ===== */
+    .section { display: none; animation: fadeIn 0.5s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ===== KPI CARDS ===== */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .kpi-card {
+        background: linear-gradient(145deg, var(--bg-800), var(--bg-850));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        border-color: rgba(0,212,255,0.2);
+    }
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+    .kpi-card.success::before { background: linear-gradient(90deg, var(--success), #34d399); }
+    .kpi-card.warning::before { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+    .kpi-card.danger::before { background: linear-gradient(90deg, var(--danger), #f87171); }
+    .kpi-card.info::before { background: linear-gradient(90deg, var(--info), #a78bfa); }
+    
+    .kpi-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+    }
+    .kpi-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 6px;
+        letter-spacing: -1px;
+    }
+    .kpi-change {
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+    }
+    .kpi-change.up { color: var(--success); }
+    .kpi-change.down { color: var(--danger); }
+    .kpi-change.neutral { color: var(--text-muted); }
+    .kpi-icon {
+        position: absolute;
+        top: 18px; right: 18px;
+        font-size: 28px;
+        opacity: 0.15;
+    }
+
+    /* ===== PANELS ===== */
+    .panel {
+        background: linear-gradient(145deg, var(--bg-800), var(--bg-850));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .panel:hover { border-color: rgba(0,212,255,0.1); }
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .panel-title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+    .panel-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    
+    .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    /* ===== TABLES ===== */
+    .table-responsive { overflow-x: auto; border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    thead th {
+        text-align: left;
+        padding: 12px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    tbody td {
+        padding: 14px 12px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+    tbody tr { transition: background 0.2s; }
+    tbody tr:hover { background: rgba(0,212,255,0.04); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* ===== BADGES ===== */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .badge-dot-sm {
+        width: 6px; height: 6px; border-radius: 50%;
+    }
+    .badge.transit { background: rgba(14,165,233,0.12); color: #38bdf8; }
+    .badge.transit .badge-dot-sm { background: #38bdf8; }
+    .badge.customs { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .badge.customs .badge-dot-sm { background: #fbbf24; }
+    .badge.delivered { background: rgba(16,185,129,0.12); color: #34d399; }
+    .badge.delivered .badge-dot-sm { background: #34d399; }
+    .badge.delayed { background: rgba(239,68,68,0.12); color: #f87171; }
+    .badge.delayed .badge-dot-sm { background: #f87171; }
+    .badge.pending { background: rgba(156,163,175,0.12); color: #9ca3af; }
+    .badge.pending .badge-dot-sm { background: #9ca3af; }
+    .badge.rma { background: rgba(139,92,246,0.12); color: #a78bfa; }
+    .badge.rma .badge-dot-sm { background: #a78bfa; }
+
+    .mode-badge {
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    .mode-sea { background: linear-gradient(135deg, #1e3a8a, #1e40af); color: #93c5fd; }
+    .mode-air { background: linear-gradient(135deg, #7c2d12, #9a3412); color: #fdba74; }
+    .mode-road { background: linear-gradient(135deg, #365314, #3f6212); color: #bef264; }
+    .mode-rail { background: linear-gradient(135deg, #581c87, #6b21a8); color: #d8b4fe; }
+
+    .tier-badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+    .tier-1 { background: rgba(0,212,255,0.15); color: var(--accent); }
+    .tier-2 { background: rgba(139,92,246,0.15); color: #a78bfa; }
+    .tier-3 { background: rgba(156,163,175,0.15); color: var(--text-muted); }
+
+    /* ===== WORLD MAP ===== */
+    .world-map-container {
+        position: relative;
+        background: radial-gradient(ellipse at center, #0d1b2a 0%, #0a0e1a 100%);
+        border-radius: 12px;
+        padding: 20px;
+        overflow: hidden;
+        min-height: 380px;
+    }
+    .map-overlay {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+    }
+    .hub {
+        position: absolute;
+        width: 12px; height: 12px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(0,212,255,0.2), 0 0 20px rgba(0,212,255,0.4);
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+        transition: all 0.3s;
+        z-index: 5;
+    }
+    .hub:hover { 
+        transform: translate(-50%, -50%) scale(1.5); 
+        box-shadow: 0 0 0 6px rgba(0,212,255,0.3), 0 0 30px rgba(0,212,255,0.6);
+    }
+    .hub::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border: 1px solid var(--accent);
+        border-radius: 50%;
+        opacity: 0;
+        animation: pulse 2.5s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(3); opacity: 0; }
+    }
+    .hub-label {
+        position: absolute;
+        font-size: 10px;
+        color: var(--text);
+        background: rgba(10,14,26,0.9);
+        padding: 3px 8px;
+        border-radius: 6px;
+        transform: translate(-50%, 8px);
+        white-space: nowrap;
+        border: 1px solid rgba(0,212,255,0.2);
+        backdrop-filter: blur(4px);
+        z-index: 10;
+    }
+    .route-line {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent), transparent);
+        transform-origin: left center;
+        opacity: 0.4;
+        animation: routePulse 3s infinite;
+    }
+    @keyframes routePulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.7; }
+    }
+
+    /* ===== FORMS ===== */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+    .form-control {
+        background: var(--bg-900);
+        border: 1px solid var(--border);
+        padding: 10px 14px;
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 13px;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+    .form-control:focus { 
+        outline: none; 
+        border-color: var(--accent); 
+        box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+    }
+    select.form-control { cursor: pointer; }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        color: #001018;
+        padding: 11px 24px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-primary:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 6px 20px rgba(0,212,255,0.35); 
+    }
+    .btn-secondary {
+        background: var(--bg-700);
+        color: var(--text);
+        padding: 10px 20px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-secondary:hover { background: var(--bg-600); border-color: var(--accent); }
+    .btn-danger {
+        background: rgba(239,68,68,0.15);
+        color: var(--danger);
+        padding: 10px 20px;
+        border: 1px solid rgba(239,68,68,0.3);
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); }
+
+    /* ===== TIMELINE ===== */
+    .timeline {
+        position: relative;
+        padding-left: 32px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 9px;
+        top: 8px;
+        bottom: 8px;
+        width: 2px;
+        background: linear-gradient(180deg, var(--border), var(--accent), var(--border));
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 22px;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-dot {
+        position: absolute;
+        left: -29px;
+        top: 3px;
+        width: 16px; height: 16px;
+        border-radius: 50%;
+        background: var(--bg-700);
+        border: 2px solid var(--border);
+        transition: all 0.3s;
+    }
+    .timeline-item.active .timeline-dot {
+        background: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 5px rgba(0,212,255,0.15);
+    }
+    .timeline-item.done .timeline-dot {
+        background: var(--success);
+        border-color: var(--success);
+    }
+    .timeline-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .timeline-meta { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+    /* ===== WAREHOUSE CARDS ===== */
+    .wh-card {
+        background: linear-gradient(145deg, var(--bg-900), var(--bg-850));
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 12px;
+        transition: all 0.3s;
+    }
+    .wh-card:hover { border-color: rgba(0,212,255,0.15); transform: translateX(4px); }
+    .wh-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 12px;
+    }
+    .wh-flag { font-size: 20px; margin-right: 6px; }
+    .wh-name { font-weight: 700; font-size: 14px; }
+    .wh-code { font-size: 11px; color: var(--text-muted); font-family: 'SF Mono', monospace; letter-spacing: 0.5px; }
+    .capacity-bar {
+        height: 8px;
+        background: var(--bg-700);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    .capacity-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--success), var(--warning));
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    .capacity-fill.high { background: linear-gradient(90deg, var(--warning), var(--danger)); }
+    .capacity-fill.critical { background: linear-gradient(90deg, var(--danger), #b91c1c); }
+    .wh-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 8px;
+        font-weight: 500;
+    }
+
+    /* ===== ALERT CARDS ===== */
+    .alert-card {
+        padding: 14px 16px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: start;
+        gap: 12px;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .alert-card:hover { transform: translateX(4px); }
+    .alert-card.danger {
+        background: rgba(239,68,68,0.06);
+        border-left: 3px solid var(--danger);
+    }
+    .alert-card.warning {
+        background: rgba(245,158,11,0.06);
+        border-left: 3px solid var(--warning);
+    }
+    .alert-card.info {
+        background: rgba(14,165,233,0.06);
+        border-left: 3px solid var(--accent);
+    }
+    .alert-card.success {
+        background: rgba(16,185,129,0.06);
+        border-left: 3px solid var(--success);
+    }
+
+    /* ===== PO CARDS ===== */
+    .po-card {
+        background: linear-gradient(145deg, var(--bg-900), var(--bg-850));
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 12px;
+        transition: all 0.3s;
+    }
+    .po-card:hover { border-color: rgba(0,212,255,0.15); }
+    .po-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 10px;
+    }
+    .po-number {
+        font-family: 'SF Mono', monospace;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent);
+    }
+    .po-meta {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+    .po-progress {
+        height: 6px;
+        background: var(--bg-700);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .po-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    /* ===== RMA CARDS ===== */
+    .rma-card {
+        background: linear-gradient(145deg, var(--bg-900), var(--bg-850));
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 10px;
+        transition: all 0.3s;
+    }
+    .rma-card:hover { border-color: rgba(139,92,246,0.2); }
+
+    /* ===== SUSTAINABILITY GAUGE ===== */
+    .eco-gauge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        background: rgba(16,185,129,0.06);
+        border-radius: 10px;
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+    .eco-score {
+        width: 50px; height: 50px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800;
+        font-size: 14px;
+        background: conic-gradient(var(--success) 0% 78%, var(--bg-700) 78% 100%);
+        position: relative;
+    }
+    .eco-score::before {
+        content: '';
+        position: absolute;
+        inset: 4px;
+        background: var(--bg-900);
+        border-radius: 50%;
+    }
+    .eco-score span { position: relative; z-index: 1; }
+
+    /* ===== PROGRESS RING ===== */
+    .progress-ring {
+        width: 60px; height: 60px;
+        transform: rotate(-90deg);
+    }
+    .progress-ring circle {
+        fill: none;
+        stroke-width: 6;
+    }
+    .progress-ring .bg { stroke: var(--bg-700); }
+    .progress-ring .fill { 
+        stroke: var(--accent); 
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+
+    /* ===== AI INSIGHTS PANEL ===== */
+    .ai-insight {
+        background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(139,92,246,0.08));
+        border: 1px solid rgba(0,212,255,0.15);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: start;
+        gap: 12px;
+    }
+    .ai-icon {
+        width: 36px; height: 36px;
+        background: linear-gradient(135deg, var(--accent), var(--info));
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: var(--text-muted);
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+    /* ===== TOAST ===== */
+    .toast-container {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .toast {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-left: 4px solid var(--success);
+        padding: 14px 20px;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        animation: slideIn 0.3s ease;
+        font-size: 13px;
+        backdrop-filter: blur(12px);
+        max-width: 400px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .toast.danger { border-left-color: var(--danger); }
+    .toast.warning { border-left-color: var(--warning); }
+    .toast.info { border-left-color: var(--accent); }
+    @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { to { transform: translateX(120%); opacity: 0; } }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.7);
+        display: none;
+        align-items: center; justify-content: center;
+        z-index: 100;
+        backdrop-filter: blur(6px);
+        padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+        background: linear-gradient(145deg, var(--bg-800), var(--bg-850));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: modalIn 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    @keyframes modalIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+    .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 22px;
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+    }
+    .close-btn:hover { background: var(--bg-700); color: var(--text); }
+
+    /* ===== FILTERS BAR ===== */
+    .filters-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .filter-chip {
+        background: var(--bg-900);
+        border: 1px solid var(--border);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    .filter-chip:hover, .filter-chip.active {
+        background: rgba(0,212,255,0.1);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    /* ===== STAT CARDS SMALL ===== */
+    .stat-mini {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        background: var(--bg-900);
+        border-radius: 10px;
+        border: 1px solid var(--border);
+    }
+    .stat-mini-icon {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+        background: rgba(0,212,255,0.1);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1200px) {
+        .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+            width: 280px;
+        }
+        .sidebar.active { transform: translateX(0); }
+        .main { 
+            margin-left: 0; 
+            padding: 16px;
+            padding-top: 60px;
+        }
+        .menu-toggle { display: flex; }
+        .topbar { flex-direction: column; align-items: stretch; }
+        .topbar h2 { font-size: 18px; }
+        .search-box { width: 100%; }
+        .topbar-actions { justify-content: flex-end; }
+        .kpi-grid { grid-template-columns: 1fr; }
+        .form-grid { grid-template-columns: 1fr; }
+        .panel { padding: 16px; }
+        .world-map-container { min-height: 280px; }
+    }
+    
+    @media (max-width: 480px) {
+        .kpi-value { font-size: 22px; }
+        .panel-title { font-size: 14px; }
+        .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .fade-in-up { animation: fadeInUp 0.5s ease forwards; }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+    .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+    .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+    .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+
+    /* ===== LOADING SKELETON ===== */
+    .skeleton {
+        background: linear-gradient(90deg, var(--bg-700) 25%, var(--bg-600) 50%, var(--bg-700) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+    }
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* ===== TOOLTIP ===== */
+    [data-tooltip] {
+        position: relative;
+    }
+    [data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-700);
+        color: var(--text);
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.2s;
+        border: 1px solid var(--border);
+        z-index: 50;
+    }
+    [data-tooltip]:hover::after {
+        opacity: 1;
+        bottom: calc(100% + 6px);
+    }
+
+    /* ===== TAGS ===== */
+    .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        background: var(--bg-700);
+        color: var(--text-muted);
+    }
+
+    /* ===== CARBON FOOTPRINT BAR ===== */
+    .carbon-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+    }
+    .carbon-track {
+        flex: 1;
+        height: 8px;
+        background: var(--bg-700);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .carbon-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    .carbon-fill.low { background: linear-gradient(90deg, var(--success), #34d399); }
+    .carbon-fill.medium { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+    .carbon-fill.high { background: linear-gradient(90deg, var(--danger), #f87171); }
+
+    /* ===== NOTIFICATION PANEL ===== */
+    .notif-panel {
+        position: absolute;
+        top: 50px;
+        right: 0;
+        width: 360px;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        backdrop-filter: blur(20px);
+        z-index: 50;
+        display: none;
+        overflow: hidden;
+    }
+    .notif-panel.active { display: block; animation: notifIn 0.2s ease; }
+    @keyframes notifIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .notif-header {
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .notif-item {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 12px;
+        align-items: start;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .notif-item:hover { background: rgba(0,212,255,0.04); }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-icon {
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+</style>
+</head>
+<body>
+
+<!-- Mobile Menu Toggle -->
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo">
+        <div class="logo-icon">🌐</div>
+        <div class="logo-text">
+            <h1>GLOBAL SCM</h1>
+            <p>Supply Chain OS</p>
+        </div>
+    </div>
+
+    <div class="nav-section-title">Operações</div>
+    <div class="nav-item active" onclick="showSection('dashboard', this)">
+        <span class="icon">📊</span> Command Center
+    </div>
+    <div class="nav-item" onclick="showSection('shipments', this)">
+        <span class="icon">📦</span> Embarques
+    </div>
+    <div class="nav-item" onclick="showSection('tracking', this)">
+        <span class="icon">🛰️</span> Rastreamento
+    </div>
+    <div class="nav-item" onclick="showSection('warehouses', this)">
+        <span class="icon">🏭</span> Armazéns Globais
+    </div>
+    <div class="nav-item" onclick="showSection('purchaseOrders', this)">
+        <span class="icon">📋</span> Ordens de Compra
+    </div>
+    <div class="nav-item" onclick="showSection('returns', this)">
+        <span class="icon">🔄</span> Devoluções (RMA)
+    </div>
+
+    <div class="nav-section-title">Parceiros</div>
+    <div class="nav-item" onclick="showSection('carriers', this)">
+        <span class="icon">🚢</span> Transportadoras
+    </div>
+    <div class="nav-item" onclick="showSection('suppliers', this)">
+        <span class="icon">🏢</span> Fornecedores
+    </div>
+
+    <div class="nav-section-title">Analytics & ESG</div>
+    <div class="nav-item" onclick="showSection('reports', this)">
+        <span class="icon">📈</span> Relatórios & KPIs
+    </div>
+    <div class="nav-item" onclick="showSection('sustainability', this)">
+        <span class="icon">🌱</span> Sustainability
+    </div>
+    <div class="nav-item" onclick="showSection('exceptions', this)">
+        <span class="icon">⚠️</span> Gestão de Exceções
+    </div>
+
+    <div class="nav-section-title">Financeiro</div>
+    <div class="nav-item" onclick="showSection('financials', this)">
+        <span class="icon">💰</span> Análise Financeira
+    </div>
+
+    <div class="sidebar-footer">
+        <div style="margin-bottom:4px;">🤖 AI-Powered SCM</div>
+        <div>v2.6.0 • 2026</div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <div>
+            <h2 id="pageTitle">Command Center</h2>
+            <div class="breadcrumb" id="breadcrumb">Supply Chain Management › Visão Global</div>
+        </div>
+        <div class="topbar-actions">
+            <input type="text" class="search-box" placeholder="🔍 Buscar BL, container, pedido..." onkeyup="globalSearch(this.value)">
+            <div class="btn-icon" title="Notificações" onclick="toggleNotifications()" style="position:relative;">
+                🔔<span class="badge-dot"></span>
+                <div class="notif-panel" id="notifPanel"></div>
+            </div>
+            <div class="btn-icon" title="Usuário" data-tooltip="Admin User">👤</div>
+        </div>
+    </div>
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <div id="dashboard" class="section active">
+        <!-- AI Insights Banner -->
+        <div class="ai-insight fade-in-up">
+            <div class="ai-icon">🤖</div>
+            <div>
+                <div style="font-weight:700;font-size:13px;margin-bottom:2px;">Insights da IA</div>
+                <div style="font-size:12px;color:var(--text-muted);" id="aiInsightText">Analisando padrões de demanda...</div>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card fade-in-up stagger-1">
+                <span class="kpi-icon">📦</span>
+                <div class="kpi-label">Embarques Ativos</div>
+                <div class="kpi-value" id="kpiActive">0</div>
+                <div class="kpi-change up">▲ 12.4% vs. mês anterior</div>
+            </div>
+            <div class="kpi-card success fade-in-up stagger-2">
+                <span class="kpi-icon">✅</span>
+                <div class="kpi-label">OTIF (On-Time In-Full)</div>
+                <div class="kpi-value" id="kpiOTIF">0%</div>
+                <div class="kpi-change up">▲ 3.2pp • Meta: 95%</div>
+            </div>
+            <div class="kpi-card warning fade-in-up stagger-3">
+                <span class="kpi-icon">⏱️</span>
+                <div class="kpi-label">Lead Time Médio</div>
+                <div class="kpi-value" id="kpiLeadTime">0 d</div>
+                <div class="kpi-change down">▼ 1.8 dias</div>
+            </div>
+            <div class="kpi-card danger fade-in-up stagger-4">
+                <span class="kpi-icon">⚠️</span>
+                <div class="kpi-label">Exceções Abertas</div>
+                <div class="kpi-value" id="kpiExceptions">0</div>
+                <div class="kpi-change down">Atrasos & Avarias</div>
+            </div>
+            <div class="kpi-card info fade-in-up stagger-4">
+                <span class="kpi-icon">🎯</span>
+                <div class="kpi-label">Perfect Order Rate</div>
+                <div class="kpi-value" id="kpiPOR">0%</div>
+                <div class="kpi-change up">▲ 1.5pp</div>
+            </div>
+            <div class="kpi-card success fade-in-up stagger-3">
+                <span class="kpi-icon">🌱</span>
+                <div class="kpi-label">Emissão CO₂/mês</div>
+                <div class="kpi-value" id="kpiCarbon">0 t</div>
+                <div class="kpi-change neutral">▼ 8% vs. baseline</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🗺️ Rede Logística Global</div>
+                        <div class="panel-subtitle">Hubs ativos e rotas em tempo real</div>
+                    </div>
+                </div>
+                <div class="world-map-container" style="height: 380px;">
+                    <div class="map-overlay"></div>
+                    <svg width="100%" height="100%" viewBox="0 0 1000 400" preserveAspectRatio="none" style="position:absolute;inset:0;">
+                        <path d="M 150 120 Q 200 100 260 130 L 280 180 Q 250 220 200 210 Z" fill="#1f2937" opacity="0.5"/>
+                        <path d="M 220 230 Q 260 240 280 300 L 250 340 Q 220 320 210 270 Z" fill="#1f2937" opacity="0.5"/>
+                        <path d="M 420 100 Q 520 80 600 120 L 620 180 Q 560 200 480 190 Z" fill="#1f2937" opacity="0.5"/>
+                        <path d="M 440 200 Q 500 210 540 270 L 510 320 Q 460 310 440 260 Z" fill="#1f2937" opacity="0.5"/>
+                        <path d="M 620 120 Q 780 90 880 140 L 900 220 Q 820 250 720 230 Q 650 210 620 180 Z" fill="#1f2937" opacity="0.5"/>
+                        <path d="M 780 280 Q 850 270 900 310 L 880 340 Q 820 350 790 330 Z" fill="#1f2937" opacity="0.5"/>
+                    </svg>
+                    <div id="mapHubs"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📊 Volume por Modal</div>
+                        <div class="panel-subtitle">TEU / Toneladas por tipo de transporte</div>
+                    </div>
+                </div>
+                <canvas id="chartModal" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:20px;">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📋 Embarques Recentes</div>
+                        <div class="panel-subtitle">Últimas movimentações na rede</div>
+                    </div>
+                    <button class="btn-secondary" onclick="showSection('shipments', document.querySelectorAll('.nav-item')[1])">Ver todos →</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>BL / AWB</th>
+                                <th>Rota</th>
+                                <th>Modal</th>
+                                <th>Status</th>
+                                <th>ETA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentShipments"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">⚠️ Alertas & Exceções</div>
+                        <div class="panel-subtitle">Eventos que requerem ação</div>
+                    </div>
+                </div>
+                <div id="alertsList"></div>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-top:20px;">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🌍 Performance por Corredor Logístico</div>
+                    <div class="panel-subtitle">Principais rotas internacionais</div>
+                </div>
+            </div>
+            <canvas id="chartCorridor" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- ==================== SHIPMENTS ==================== -->
+    <div id="shipments" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">➕ Novo Embarque</div>
+                    <div class="panel-subtitle">Registre uma nova operação na rede global</div>
+                </div>
+            </div>
+            <form id="shipmentForm" onsubmit="createShipment(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nº BL / AWB</label>
+                        <input type="text" class="form-control" id="blNumber" placeholder="Ex: MAEU1234567" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cliente / Shipper</label>
+                        <input type="text" class="form-control" id="customer" placeholder="Ex: Apple Inc." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Origem (Porto/Aeroporto)</label>
+                        <select class="form-control" id="origin" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Destino (Porto/Aeroporto)</label>
+                        <select class="form-control" id="destination" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Modal de Transporte</label>
+                        <select class="form-control" id="mode" required>
+                            <option value="sea">🚢 Marítimo (FCL/LCL)</option>
+                            <option value="air">✈️ Aéreo</option>
+                            <option value="road">🚛 Rodoviário</option>
+                            <option value="rail">🚆 Ferroviário</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Incoterm</label>
+                        <select class="form-control" id="incoterm" required>
+                            <option value="EXW">EXW - Ex Works</option>
+                            <option value="FOB" selected>FOB - Free On Board</option>
+                            <option value="CIF">CIF - Cost, Insurance & Freight</option>
+                            <option value="DDP">DDP - Delivered Duty Paid</option>
+                            <option value="DAP">DAP - Delivered At Place</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Operador Logístico</label>
+                        <select class="form-control" id="carrier" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso (kg)</label>
+                        <input type="number" class="form-control" id="weight" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor CIF (USD)</label>
+                        <input type="number" class="form-control" id="valueUSD" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" id="status" required>
+                            <option value="pending">📋 Aguardando Coleta</option>
+                            <option value="transit">🚢 Em Trânsito</option>
+                            <option value="customs">🛃 Em Despacho Aduaneiro</option>
+                            <option value="delivered">✅ Entregue</option>
+                            <option value="delayed">⚠️ Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group full" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <button type="submit" class="btn-primary">🚀 Registrar Embarque</button>
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('shipmentForm').reset()">Limpar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">📦 Embarques Cadastrados</div>
+                    <div class="panel-subtitle">Total: <span id="shipmentsCount">0</span> operações</div>
+                </div>
+                <div class="filters-bar">
+                    <span class="filter-chip active" onclick="filterShipments('all', this)">Todos</span>
+                    <span class="filter-chip" onclick="filterShipments('transit', this)">Em Trânsito</span>
+                    <span class="filter-chip" onclick="filterShipments('delayed', this)">Atrasados</span>
+                    <span class="filter-chip" onclick="filterShipments('delivered', this)">Entregues</span>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>BL / AWB</th>
+                            <th>Cliente</th>
+                            <th>Rota</th>
+                            <th>Modal</th>
+                            <th>Incoterm</th>
+                            <th>Operador</th>
+                            <th>Valor (USD)</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shipmentsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TRACKING ==================== -->
+    <div id="tracking" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🛰️ Rastreamento de Embarque</div>
+                    <div class="panel-subtitle">Insira o BL, AWB ou Container</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;max-width:600px;flex-wrap:wrap;">
+                <input type="text" class="form-control" id="trackInput" placeholder="Ex: MAEU1234567" style="flex:1;min-width:200px;">
+                <button class="btn-primary" onclick="trackShipment()">Rastrear</button>
+            </div>
+        </div>
+        <div id="trackResult"></div>
+    </div>
+
+    <!-- ==================== WAREHOUSES ==================== -->
+    <div id="warehouses" class="section">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <span class="kpi-icon">🏭</span>
+                <div class="kpi-label">Armazéns Ativos</div>
+                <div class="kpi-value" id="whCount">0</div>
+                <div class="kpi-change">Em 14 países</div>
+            </div>
+            <div class="kpi-card success">
+                <span class="kpi-icon">📊</span>
+                <div class="kpi-label">Capacidade Total</div>
+                <div class="kpi-value" id="whCapacity">0 m²</div>
+                <div class="kpi-change up">Ocupação média: 74%</div>
+            </div>
+            <div class="kpi-card warning">
+                <span class="kpi-icon">📦</span>
+                <div class="kpi-label">SKUs em Estoque</div>
+                <div class="kpi-value" id="whSKUs">0</div>
+                <div class="kpi-change">Inventário global</div>
+            </div>
+            <div class="kpi-card info">
+                <span class="kpi-icon">🔄</span>
+                <div class="kpi-label">Inventory Turnover</div>
+                <div class="kpi-value">8.4x</div>
+                <div class="kpi-change up">▲ 0.3x vs. trimestre</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🌐 Rede de Armazéns Globais</div>
+                    <div class="panel-subtitle">Distribuição estratégica por região</div>
+                </div>
+            </div>
+            <div id="warehousesList"></div>
+        </div>
+    </div>
+
+    <!-- ==================== PURCHASE ORDERS ==================== -->
+    <div id="purchaseOrders" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">➕ Nova Ordem de Compra</div>
+                    <div class="panel-subtitle">Crie um novo PO para a cadeia de suprimentos</div>
+                </div>
+            </div>
+            <form id="poForm" onsubmit="createPO(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nº PO</label>
+                        <input type="text" class="form-control" id="poNumber" placeholder="Ex: PO-2026-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select class="form-control" id="poSupplier" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Item / SKU</label>
+                        <input type="text" class="form-control" id="poItem" placeholder="Ex: PCB-Mainboard-X1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantidade</label>
+                        <input type="number" class="form-control" id="poQty" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor Unitário (USD)</label>
+                        <input type="number" class="form-control" id="poUnitPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data de Entrega Esperada</label>
+                        <input type="date" class="form-control" id="poDeliveryDate" required>
+                    </div>
+                    <div class="form-group full" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <button type="submit" class="btn-primary">📋 Criar PO</button>
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('poForm').reset()">Limpar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">📋 Ordens de Compra</div>
+                    <div class="panel-subtitle">Pipeline de procurement</div>
+                </div>
+            </div>
+            <div id="poList"></div>
+        </div>
+    </div>
+
+    <!-- ==================== RETURNS (RMA) ==================== -->
+    <div id="returns" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🔄 Gestão de Devoluções (RMA)</div>
+                    <div class="panel-subtitle">Reverse Logistics & Returns Management</div>
+                </div>
+            </div>
+            <div class="kpi-grid" style="margin-bottom:20px;">
+                <div class="kpi-card warning">
+                    <span class="kpi-icon">🔄</span>
+                    <div class="kpi-label">Taxa de Retorno</div>
+                    <div class="kpi-value">2.4%</div>
+                    <div class="kpi-change down">▼ 0.3pp vs. meta 2%</div>
+                </div>
+                <div class="kpi-card info">
+                    <span class="kpi-icon">⏱️</span>
+                    <div class="kpi-label">Tempo Médio RMA</div>
+                    <div class="kpi-value">5.2 d</div>
+                    <div class="kpi-change up">▲ 0.8 dias</div>
+                </div>
+                <div class="kpi-card success">
+                    <span class="kpi-icon">✅</span>
+                    <div class="kpi-label">RMAs Resolvidos</div>
+                    <div class="kpi-value">94%</div>
+                    <div class="kpi-change up">▲ 2.1pp</div>
+                </div>
+            </div>
+            <div id="rmaList"></div>
+        </div>
+    </div>
+
+    <!-- ==================== CARRIERS ==================== -->
+    <div id="carriers" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🚢 Operadores Logísticos Globais</div>
+                    <div class="panel-subtitle">Parceiros de transporte multimodal</div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operador</th>
+                            <th>HQ</th>
+                            <th>Modal</th>
+                            <th>Frota</th>
+                            <th>Cobertura</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="carriersTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SUPPLIERS ==================== -->
+    <div id="suppliers" class="section">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">🏢 Fornecedores Globais</div>
+                    <div class="panel-subtitle">Base de suppliers estratégicos</div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>País</th>
+                            <th>Setor</th>
+                            <th>Tier</th>
+                            <th>Lead Time</th>
+                            <th>Rating</th>
+                            <th>ESG Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="suppliersTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SUSTAINABILITY ==================== -->
+    <div id="sustainability" class="section">
+        <div class="kpi-grid">
+            <div class="kpi-card success">
+                <span class="kpi-icon">🌱</span>
+                <div class="kpi-label">Emissão Total CO₂</div>
+                <div class="kpi-value">1,247 t</div>
+                <div class="kpi-change up">▼ 12% vs. 2025</div>
+            </div>
+            <div class="kpi-card info">
+                <span class="kpi-icon">⚡</span>
+                <div class="kpi-label">Energia Renovável</div>
+                <div class="kpi-value">68%</div>
+                <div class="kpi-change up">▲ 8pp</div>
+            </div>
+            <div class="kpi-card warning">
+                <span class="kpi-icon">♻️</span>
+                <div class="kpi-label">Taxa de Reciclagem</div>
+                <div class="kpi-value">82%</div>
+                <div class="kpi-change neutral">Meta: 90%</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🌍 Pegada de Carbono por Embarque</div>
+                        <div class="panel-subtitle">Emissões CO₂e (kg) por operação</div>
+                    </div>
+                </div>
+                <div id="carbonList"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🏆 ESG Score dos For

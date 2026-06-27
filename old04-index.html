@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas SCM • Global Supply Chain OS</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg-950: #030712;
+            --bg-900: #0f172a;
+            --bg-800: #1e293b;
+            --bg-700: #334155;
+            --bg-600: #475569;
+            --surface: rgba(30, 41, 59, 0.7);
+            --accent: #06b6d4;
+            --accent-2: #0891b2;
+            --accent-glow: rgba(6, 182, 212, 0.15);
+            --blue: #3b82f6;
+            --indigo: #6366f1;
+            --violet: #8b5cf6;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --orange: #f97316;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(148, 163, 184, 0.1);
+            --border-hover: rgba(6, 182, 212, 0.3);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-xs: 6px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-w: 272px;
+            --topbar-h: 64px;
+        }
+
+        html {
+            font-size: 14px;
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-950);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-700);
+            border-radius: 3px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bg-600)
+        }
+
+        /* LAYOUT */
+        .app {
+            display: flex;
+            min-height: 100vh
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: linear-gradient(180deg, #0c1222 0%, var(--bg-950) 100%);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease
+        }
+
+        .sidebar-header {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--indigo));
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3)
+        }
+
+        .brand-info h1 {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .brand-info span {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted)
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px
+        }
+
+        .nav-group-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 16px 12px 8px;
+            font-weight: 600
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            position: relative;
+            margin: 1px 0
+        }
+
+        .nav-item:hover {
+            background: var(--accent-glow);
+            color: var(--text-primary)
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.12), transparent);
+            color: var(--accent);
+            font-weight: 600
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 0 3px 3px 0
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 15px;
+            flex-shrink: 0
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--rose);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border)
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--indigo), var(--accent));
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .user-info {
+            font-size: 12px
+        }
+
+        .user-info strong {
+            display: block;
+            font-size: 13px
+        }
+
+        /* MAIN */
+        .main-wrapper {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column
+        }
+
+        /* TOPBAR */
+        .topbar {
+            height: var(--topbar-h);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 50
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px
+        }
+
+        .page-title-group h2 {
+            font-size: 18px;
+            font-weight: 600
+        }
+
+        .page-title-group .breadcrumb {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .search-input {
+            background: var(--bg-800);
+            border: 1px solid var(--border);
+            padding: 8px 14px 8px 36px;
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 13px;
+            width: 280px;
+            transition: var(--transition);
+            position: relative
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow)
+        }
+
+        .search-wrap {
+            position: relative
+        }
+
+        .search-wrap::before {
+            content: '🔍';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            z-index: 1
+        }
+
+        .top-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-800);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+            font-size: 15px
+        }
+
+        .top-btn:hover {
+            border-color: var(--border-hover);
+            background: var(--accent-glow)
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 7px;
+            height: 7px;
+            background: var(--rose);
+            border-radius: 50%;
+            border: 2px solid var(--bg-900)
+        }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            padding: 24px 28px 40px
+        }
+
+        /* SECTIONS */
+        .section {
+            display: none;
+            animation: fadeUp .4s ease
+        }
+
+        .section.active {
+            display: block
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px
+        }
+
+        .kpi {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition)
+        }
+
+        .kpi:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow)
+        }
+
+        .kpi::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px
+        }
+
+        .kpi[data-color="cyan"]::after {
+            background: linear-gradient(90deg, var(--accent), transparent)
+        }
+
+        .kpi[data-color="emerald"]::after {
+            background: linear-gradient(90deg, var(--emerald), transparent)
+        }
+
+        .kpi[data-color="amber"]::after {
+            background: linear-gradient(90deg, var(--amber), transparent)
+        }
+
+        .kpi[data-color="rose"]::after {
+            background: linear-gradient(90deg, var(--rose), transparent)
+        }
+
+        .kpi[data-color="blue"]::after {
+            background: linear-gradient(90deg, var(--blue), transparent)
+        }
+
+        .kpi[data-color="violet"]::after {
+            background: linear-gradient(90deg, var(--violet), transparent)
+        }
+
+        .kpi-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600
+        }
+
+        .kpi-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            display: grid;
+            place-items: center;
+            font-size: 16px
+        }
+
+        .kpi-icon-wrap.cyan {
+            background: rgba(6, 182, 212, 0.12);
+            color: var(--accent)
+        }
+
+        .kpi-icon-wrap.emerald {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--emerald)
+        }
+
+        .kpi-icon-wrap.amber {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--amber)
+        }
+
+        .kpi-icon-wrap.rose {
+            background: rgba(244, 63, 94, 0.12);
+            color: var(--rose)
+        }
+
+        .kpi-icon-wrap.blue {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--blue)
+        }
+
+        .kpi-icon-wrap.violet {
+            background: rgba(139, 92, 246, 0.12);
+            color: var(--violet)
+        }
+
+        .kpi-val {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .kpi-trend {
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 4px
+        }
+
+        .kpi-trend.up {
+            color: var(--emerald);
+            background: rgba(16, 185, 129, 0.1)
+        }
+
+        .kpi-trend.down {
+            color: var(--rose);
+            background: rgba(244, 63, 94, 0.1)
+        }
+
+        /* PANELS */
+        .panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            margin-bottom: 20px;
+            transition: var(--transition)
+        }
+
+        .panel:hover {
+            border-color: rgba(148, 163, 184, 0.15)
+        }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .panel-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px
+        }
+
+        /* GRIDS */
+        .g2 {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 20px
+        }
+
+        .g3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px
+        }
+
+        .g4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px
+        }
+
+        /* TABLES */
+        .tbl-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px
+        }
+
+        thead th {
+            text-align: left;
+            padding: 11px 14px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap
+        }
+
+        tbody td {
+            padding: 13px 14px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle
+        }
+
+        tbody tr {
+            transition: var(--transition)
+        }
+
+        tbody tr:hover {
+            background: rgba(6, 182, 212, 0.03)
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: var(--radius-xs);
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap
+        }
+
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+
+        .b-transit {
+            background: rgba(59, 130, 246, 0.12);
+            color: #60a5fa
+        }
+
+        .b-transit .dot {
+            background: #60a5fa
+        }
+
+        .b-customs {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24
+        }
+
+        .b-customs .dot {
+            background: #fbbf24
+        }
+
+        .b-delivered {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399
+        }
+
+        .b-delivered .dot {
+            background: #34d399
+        }
+
+        .b-delayed {
+            background: rgba(244, 63, 94, 0.12);
+            color: #fb7185
+        }
+
+        .b-delayed .dot {
+            background: #fb7185
+        }
+
+        .b-pending {
+            background: rgba(148, 163, 184, 0.12);
+            color: #94a3b8
+        }
+
+        .b-pending .dot {
+            background: #94a3b8
+        }
+
+        .b-danger {
+            background: rgba(244, 63, 94, 0.12);
+            color: #fb7185
+        }
+
+        .b-danger .dot {
+            background: #fb7185
+        }
+
+        .mode-tag {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .5px
+        }
+
+        .m-sea {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd
+        }
+
+        .m-air {
+            background: rgba(249, 115, 22, 0.15);
+            color: #fdba74
+        }
+
+        .m-road {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7
+        }
+
+        .m-rail {
+            background: rgba(139, 92, 246, 0.15);
+            color: #c4b5fd
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: inherit
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(6, 182, 212, 0.25)
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35)
+        }
+
+        .btn-ghost {
+            background: var(--bg-800);
+            color: var(--text-secondary);
+            border: 1px solid var(--border)
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary)
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 11px
+        }
+
+        .btn-danger {
+            background: rgba(244, 63, 94, 0.12);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.2)
+        }
+
+        .btn-danger:hover {
+            background: rgba(244, 63, 94, 0.2)
+        }
+
+        /* FORMS */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .form-group.full {
+            grid-column: 1/-1
+        }
+
+        .form-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500
+        }
+
+        .form-ctrl {
+            background: var(--bg-900);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+            transition: var(--transition)
+        }
+
+        .form-ctrl:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow)
+        }
+
+        select.form-ctrl {
+            cursor: pointer
+        }
+
+        select.form-ctrl option {
+            background: var(--bg-900);
+            color: var(--text-primary)
+        }
+
+        /* MAP */
+        .map-box {
+            position: relative;
+            background: radial-gradient(ellipse at center, #0c1929, var(--bg-950));
+            border-radius: var(--radius);
+            overflow: hidden;
+            min-height: 360px
+        }
+
+        .map-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none
+        }
+
+        .hub-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 2;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5)
+        }
+
+        .hub-dot::after {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border: 1.5px solid var(--accent);
+            border-radius: 50%;
+            animation: hubPulse 2.5s infinite;
+            opacity: 0
+        }
+
+        @keyframes hubPulse {
+            0% {
+                transform: scale(1);
+                opacity: .6
+            }
+
+            100% {
+                transform: scale(2.8);
+                opacity: 0
+            }
+        }
+
+        .hub-lbl {
+            position: absolute;
+            transform: translate(-50%, 12px);
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: rgba(3, 7, 18, 0.85);
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            z-index: 2;
+            pointer-events: none;
+            letter-spacing: .3px
+        }
+
+        .route-svg {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none
+        }
+
+        .route-line {
+            stroke: var(--accent);
+            stroke-width: 1;
+            stroke-dasharray: 6 4;
+            opacity: .35;
+            fill: none
+        }
+
+        /* TIMELINE */
+        .timeline {
+            position: relative;
+            padding-left: 28px
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: var(--border)
+        }
+
+        .tl-item {
+            position: relative;
+            padding-bottom: 18px
+        }
+
+        .tl-item:last-child {
+            padding-bottom: 0
+        }
+
+        .tl-dot {
+            position: absolute;
+            left: -25px;
+            top: 3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--bg-700);
+            border: 2px solid var(--border)
+        }
+
+        .tl-item.done .tl-dot {
+            background: var(--emerald);
+            border-color: var(--emerald)
+        }
+
+        .tl-item.active .tl-dot {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow)
+        }
+
+        .tl-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px
+        }
+
+        .tl-meta {
+            font-size: 11px;
+            color: var(--text-muted)
+        }
+
+        /* WAREHOUSE CARDS */
+        .wh-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 14px
+        }
+
+        .wh-card {
+            background: var(--bg-900);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            transition: var(--transition)
+        }
+
+        .wh-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px)
+        }
+
+        .wh-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px
+        }
+
+        .wh-flag {
+            font-size: 20px;
+            margin-right: 6px
+        }
+
+        .wh-name {
+            font-weight: 700;
+            font-size: 14px
+        }
+
+        .wh-code {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'Courier New', monospace;
+            margin-top: 2px
+        }
+
+        .cap-bar {
+            height: 6px;
+            background: var(--bg-700);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0 8px
+        }
+
+        .cap-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .5s ease
+        }
+
+        .cap-ok {
+            background: linear-gradient(90deg, var(--emerald), #34d399)
+        }
+
+        .cap-warn {
+            background: linear-gradient(90deg, var(--amber), #fbbf24)
+        }
+
+        .cap-crit {
+            background: linear-gradient(90deg, var(--rose), #fb7185)
+        }
+
+        .wh-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted)
+        }
+
+        /* EXCEPTION CARDS */
+        .exc-card {
+            padding: 18px;
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            border-left: 4px solid
+        }
+
+        .exc-critical {
+            background: rgba(244, 63, 94, 0.05);
+            border-color: var(--rose)
+        }
+
+        .exc-warning {
+            background: rgba(245, 158, 11, 0.05);
+            border-color: var(--amber)
+        }
+
+        .exc-info {
+            background: rgba(59, 130, 246, 0.05);
+            border-color: var(--blue)
+        }
+
+        .exc-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            font-size: 13px
+        }
+
+        .exc-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px
+        }
+
+        .exc-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px
+        }
+
+        .modal-overlay.open {
+            display: flex
+        }
+
+        .modal {
+            background: var(--bg-800);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg)
+        }
+
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .modal-head h3 {
+            font-size: 16px;
+            font-weight: 600
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px
+        }
+
+        .modal-body {
+            padding: 24px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px
+        }
+
+        .detail-item {
+            padding: 10px;
+            background: var(--bg-900);
+            border-radius: var(--radius-sm)
+        }
+
+        .detail-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600
+        }
+
+        .detail-val {
+            font-size: 14px;
+            font-weight: 600
+        }
+
+        /* TOAST */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .toast {
+            padding: 14px 20px;
+            background: var(--bg-800);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--emerald);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            animation: toastIn .3s ease;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 280px
+        }
+
+        .toast.error {
+            border-left-color: var(--rose)
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0)
+            }
+        }
+
+        /* CARBON GAUGE */
+        .carbon-ring {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            margin: 0 auto
+        }
+
+        .carbon-ring svg {
+            transform: rotate(-90deg)
+        }
+
+        .carbon-ring .ring-bg {
+            fill: none;
+            stroke: var(--bg-700);
+            stroke-width: 8
+        }
+
+        .carbon-ring .ring-fill {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset .8s ease
+        }
+
+        .carbon-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center
+        }
+
+        .carbon-val {
+            font-size: 22px;
+            font-weight: 800
+        }
+
+        .carbon-unit {
+            font-size: 10px;
+            color: var(--text-muted)
+        }
+
+        /* EMPTY */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted)
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: .5
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:1024px) {
+            .g2 {
+                grid-template-columns: 1fr
+            }
+
+            .g3 {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .g4 {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .search-input {
+                width: 200px
+            }
+        }
+
+        @media(max-width:768px) {
+            .sidebar {
+                transform: translateX(-100%)
+            }
+
+            .sidebar.open {
+                transform: translateX(0)
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, .5);
+                z-index: 99;
+                display: none
+            }
+
+            .sidebar-overlay.open {
+                display: block
+            }
+
+            .main-wrapper {
+                margin-left: 0
+            }
+
+            .menu-toggle {
+                display: block
+            }
+
+            .content {
+                padding: 16px
+            }
+
+            .topbar {
+                padding: 0 16px
+            }
+
+            .search-input {
+                display: none
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .g2,
+            .g3,
+            .g4 {
+                grid-template-columns: 1fr
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr
+            }
+
+            .page-title-group h2 {
+                font-size: 15px
+            }
+
+            .kpi-val {
+                font-size: 22px
+            }
+        }
+
+        @media(max-width:480px) {
+            .kpi-grid {
+                grid-template-columns: 1fr
+            }
+
+            .topbar-right .top-btn:not(:first-child) {
+                display: none
+            }
+
+            .wh-grid {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">A</div>
+                    <div class="brand-info">
+                        <h1>ATLAS SCM</h1>
+                        <span>Supply Chain OS</span>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-group-label">Operações</div>
+                <div class="nav-item active" data-section="dashboard"><span class="nav-icon">📊</span>Command Center
+                </div>
+                <div class="nav-item" data-section="shipments"><span class="nav-icon">📦</span>Embarques<span
+                        class="nav-badge" id="shipBadge">6</span></div>
+                <div class="nav-item" data-section="tracking"><span class="nav-icon">🛰️</span>Track & Trace</div>
+                <div class="nav-item" data-section="warehouses"><span class="nav-icon">🏭</span>Armazéns Globais</div>
+                <div class="nav-group-label">Parceiros</div>
+                <div class="nav-item" data-section="carriers"><span class="nav-icon">🚢</span>Transportadoras</div>
+                <div class="nav-item" data-section="suppliers"><span class="nav-icon">🏢</span>Fornecedores</div>
+                <div class="nav-group-label">Inteligência</div>
+                <div class="nav-item" data-section="reports"><span class="nav-icon">📈</span>Analytics & BI</div>
+                <div class="nav-item" data-section="exceptions"><span class="nav-icon">⚠️</span>Exceções<span
+                        class="nav-badge" id="excBadge">2</span></div>
+                <div class="nav-item" data-section="carbon"><span class="nav-icon">🌱</span>Carbon Tracker</div>
+                <div class="nav-item" data-section="roadmap"><span class="nav-icon">🗺️</span>Roadmap de Evolução</div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="user-avatar">RC</div>
+                    <div class="user-info"><strong>R. Carvalho</strong><span style="color:var(--text-muted)">Supply
+                            Chain Director</span></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="main-wrapper">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                    <div class="page-title-group">
+                        <h2 id="pageTitle">Command Center</h2>
+                        <div class="breadcrumb" id="breadcrumb">Atlas SCM › Visão Global</div>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="search-wrap"><input type="text" class="search-input"
+                            placeholder="Buscar BL, container, pedido..." id="globalSearch"></div>
+                    <div class="top-btn" title="Notificações">🔔<span class="notif-dot"></span></div>
+                    <div class="top-btn" title="Configurações">⚙️</div>
+                </div>
+            </header>
+
+            <main class="content">
+
+                <!-- ==================== DASHBOARD ==================== -->
+                <div class="section active" id="sec-dashboard">
+                    <div class="kpi-grid">
+                        <div class="kpi" data-color="cyan">
+                            <div class="kpi-top"><span class="kpi-label">Embarques Ativos</span>
+                                <div class="kpi-icon-wrap cyan">📦</div>
+                            </div>
+                            <div class="kpi-val" id="k-active">0</div>
+                            <div class="kpi-sub"><span class="kpi-trend up">▲ 12.4%</span> vs. mês anterior</div>
+                        </div>
+                        <div class="kpi" data-color="emerald">
+                            <div class="kpi-top"><span class="kpi-label">OTIF Rate</span>
+                                <div class="kpi-icon-wrap emerald">✅</div>
+                            </div>
+                            <div class="kpi-val" id="k-otif">0%</div>
+                            <div class="kpi-sub"><span class="kpi-trend up">▲ 3.2pp</span> Meta: 95%</div>
+                        </div>
+                        <div class="kpi" data-color="amber">
+                            <div class="kpi-top"><span class="kpi-label">Lead Time Médio</span>
+                                <div class="kpi-icon-wrap amber">⏱️</div>
+                            </div>
+                            <div class="kpi-val" id="k-lead">0d</div>
+                            <div class="kpi-sub"><span class="kpi-trend down">▼ 1.8d</span> vs. trimestre</div>
+                        </div>
+                        <div class="kpi" data-color="rose">
+                            <div class="kpi-top"><span class="kpi-label">Exceções Abertas</span>
+                                <div class="kpi-icon-wrap rose">⚠️</div>
+                            </div>
+                            <div class="kpi-val" id="k-exc">0</div>
+                            <div class="kpi-sub"><span class="kpi-trend down">Atrasos & Avarias</span></div>
+                        </div>
+                        <div class="kpi" data-color="blue">
+                            <div class="kpi-top"><span class="kpi-label">Valor em Trânsito</span>
+                                <div class="kpi-icon-wrap blue">💰</div>
+                            </div>
+                            <div class="kpi-val" id="k-value">$0</div>
+                            <div class="kpi-sub">CIF total na rede</div>
+                        </div>
+                        <div class="kpi" data-color="violet">
+                            <div class="kpi-top"><span class="kpi-label">CO₂ Este Mês</span>
+                                <div class="kpi-icon-wrap violet">🌱</div>
+                            </div>
+                            <div class="kpi-val" id="k-co2">0t</div>
+                            <div class="kpi-sub"><span class="kpi-trend up">▼ 8%</span> vs. meta ESG</div>
+                        </div>
+                    </div>
+
+                    <div class="g2">
+                        <div class="panel">
+                            <div class="panel-head">
+                                <div>
+                                    <div class="panel-title">🗺️ Rede Logística Global</div>
+                                    <div class="panel-desc">Hubs ativos e rotas em tempo real</div>
+                                </div>
+                            </div>
+                            <div class="map-box" id="worldMap">
+                                <div class="map-grid"></div>
+                                <svg class="route-svg" id="routeSvg" viewBox="0 0 1000 400"
+                                    preserveAspectRatio="none"></svg>
+                                <div id="mapHubs"></div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-head">
+                                <div>
+                                    <div class="panel-title">📊 Volume por Modal</div>
+                                    <div class="panel-desc">Toneladas por tipo de transporte</div>
+                                </div>
+                            </div>
+                            <canvas id="chartModal" height="220"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="g2">
+                        <div class="panel">
+                            <div class="panel-head">
+                                <div>
+                                    <div class="panel-title">📋 Embarques Recentes</div>
+                                    <div class="panel-desc">Últimas movimentações</div>
+                                </div>
+                                <button class="btn btn-ghost btn-sm" onclick="navigateTo('shipments')">Ver todos
+                                    →</button>
+                            </div>
+                            <div class="tbl-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>BL / AWB</th>
+                                            <th>Rota</th>
+                                            <th>Modal</th>
+                                            <th>Status</th>
+                                            <th>ETA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentTbl"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-head">
+                                <div>
+                                    <div class="panel-title">🔔 Alertas em Tempo Real</div>
+                                    <div class="panel-desc">Eventos que requerem ação</div>
+                                </div>
+                            </div>
+                            <div id="alertsBox"></div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">🌍 Performance por Corredor Logístico</div>
+                                <div class="panel-desc">Principais rotas internacionais</div>
+                            </div>
+                        </div>
+                        <canvas id="chartCorridor" height="80"></canvas>
+                    </div>
+                </div>
+
+                <!-- ==================== SHIPMENTS ==================== -->
+                <div class="section" id="sec-shipments">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">➕ Novo Embarque</div>
+                                <div class="panel-desc">Registre uma nova operação na rede global</div>
+                            </div>
+                        </div>
+                        <form id="shipForm" onsubmit="createShipment(event)">
+                            <div class="form-grid">
+                                <div class="form-group"><label class="form-label">Nº BL / AWB</label><input type="text"
+                                        class="form-ctrl" id="f-bl" placeholder="Ex: ATX-7784521" required></div>
+                                <div class="form-group"><label class="form-label">Cliente / Shipper</label><input
+                                        type="text" class="form-ctrl" id="f-cust" placeholder="Ex: NovaTech Industries"
+                                        required></div>
+                                <div class="form-group"><label class="form-label">Origem</label><select
+                                        class="form-ctrl" id="f-origin" required></select></div>
+                                <div class="form-group"><label class="form-label">Destino</label><select
+                                        class="form-ctrl" id="f-dest" required></select></div>
+                                <div class="form-group"><label class="form-label">Modal</label><select class="form-ctrl"
+                                        id="f-mode" required>
+                                        <option value="sea">🚢 Marítimo (FCL/LCL)</option>
+                                        <option value="air">✈️ Aéreo</option>
+                                        <option value="road">🚛 Rodoviário</option>
+                                        <option value="rail">🚆 Ferroviário</option>
+                                    </select></div>
+                                <div class="form-group"><label class="form-label">Incoterm</label><select
+                                        class="form-ctrl" id="f-incoterm" required>
+                                        <option value="EXW">EXW - Ex Works</option>
+                                        <option value="FOB" selected>FOB - Free On Board</option>
+                                        <option value="CIF">CIF - Cost, Insurance & Freight</option>
+                                        <option value="DDP">DDP - Delivered Duty Paid</option>
+                                        <option value="DAP">DAP - Delivered At Place</option>
+                                    </select></div>
+                                <div class="form-group"><label class="form-label">Transportadora</label><select
+                                        class="form-ctrl" id="f-carrier" required></select></div>
+                                <div class="form-group"><label class="form-label">Peso (kg)</label><input type="number"
+                                        class="form-ctrl" id="f-weight" step="0.01" required></div>
+                                <div class="form-group"><label class="form-label">Valor CIF (USD)</label><input
+                                        type="number" class="form-ctrl" id="f-value" step="0.01" required></div>
+                                <div class="form-group"><label class="form-label">Status Inicial</label><select
+                                        class="form-ctrl" id="f-status" required>
+                                        <option value="pending">📋 Aguardando Coleta</option>
+                                        <option value="transit">🚢 Em Trânsito</option>
+                                        <option value="customs">🛃 Despacho Aduaneiro</option>
+                                        <option value="delivered">✅ Entregue</option>
+                                        <option value="delayed">⚠️ Atrasado</option>
+                                    </select></div>
+                                <div class="form-group full" style="margin-top:8px;display:flex;gap:10px"><button
+                                        type="submit" class="btn btn-primary">🚀 Registrar Embarque</button><button
+                                        type="reset" class="btn btn-ghost">Limpar</button></div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">📦 Embarques Cadastrados</div>
+                                <div class="panel-desc">Total: <strong id="shipCount">0</strong> operações</div>
+                            </div>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>BL / AWB</th>
+                                        <th>Cliente</th>
+                                        <th>Rota</th>
+                                        <th>Modal</th>
+                                        <th>Incoterm</th>
+                                        <th>Operador</th>
+                                        <th>Valor (USD)</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shipsTbl"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== TRACKING ==================== -->
+                <div class="section" id="sec-tracking">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">🛰️ Track & Trace</div>
+                                <div class="panel-desc">Insira o BL, AWB ou Container para rastrear</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;max-width:600px">
+                            <input type="text" class="form-ctrl" id="trackInput" placeholder="Ex: ATX-7784521"
+                                style="flex:1">
+                            <button class="btn btn-primary" onclick="trackShipment()">Rastrear</button>
+                        </div>
+                    </div>
+                    <div id="trackResult"></div>
+                </div>
+
+                <!-- ==================== WAREHOUSES ==================== -->
+                <div class="section" id="sec-warehouses">
+                    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+                        <div class="kpi" data-color="cyan">
+                            <div class="kpi-top"><span class="kpi-label">Armazéns Ativos</span>
+                                <div class="kpi-icon-wrap cyan">🏭</div>
+                            </div>
+                            <div class="kpi-val" id="wh-count">0</div>
+                        </div>
+                        <div class="kpi" data-color="emerald">
+                            <div class="kpi-top"><span class="kpi-label">Área Total</span>
+                                <div class="kpi-icon-wrap emerald">📐</div>
+                            </div>
+                            <div class="kpi-val" id="wh-area">0 m²</div>
+                        </div>
+                        <div class="kpi" data-color="blue">
+                            <div class="kpi-top"><span class="kpi-label">SKUs em Estoque</span>
+                                <div class="kpi-icon-wrap blue">📦</div>
+                            </div>
+                            <div class="kpi-val" id="wh-skus">0</div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">🌐 Rede de Armazéns Globais</div>
+                                <div class="panel-desc">Distribuição estratégica por região</div>
+                            </div>
+                        </div>
+                        <div class="wh-grid" id="whGrid"></div>
+                    </div>
+                </div>
+
+                <!-- ==================== CARRIERS ==================== -->
+                <div class="section" id="sec-carriers">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">🚢 Transportadoras & Operadores Logísticos</div>
+                                <div class="panel-desc">Parceiros de transporte multimodal</div>
+                            </div>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Operador</th>
+                                        <th>HQ</th>
+                                        <th>Modal</th>
+                                        <th>Frota</th>
+                                        <th>Cobertura</th>
+                                        <th>OTIF</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="carriersTbl"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SUPPLIERS ==================== -->
+                <div class="section" id="sec-suppliers">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">🏢 Base de Fornecedores Globais</div>
+                                <div class="panel-desc">Suppliers estratégicos por setor</div>
+                            </div>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Empresa</th>
+                                        <th>País</th>
+                                        <th>Setor</th>
+                                        <th>Tier</th>
+                                        <th>Lead Time</th>
+                                        <th>Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="suppliersTbl"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== REPORTS ==================== -->
+                <div class="section" id="sec-reports">
+                    <div class="g3">
+                        <div class="panel">
+                            <div class="panel-title" style="margin-bottom:14px">📈 Volume Movimentado (TEU)</div><canvas
+                                id="rTEU"></canvas>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-title" style="margin-bottom:14px">💰 Receita por Modal</div><canvas
+                                id="rRev"></canvas>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-title" style="margin-bottom:14px">🎯 OTIF por Operador</div><canvas
+                                id="rOTIF"></canvas>
+                        </div>
+                    </div>
+                    <div class="panel" style="margin-top:20px">
+                        <div class="panel-title" style="margin-bottom:14px">📊 Análise de Custos Logísticos (USD mil)
+                        </div><canvas id="rCosts" height="80"></canvas>
+                    </div>
+                </div>
+
+                <!-- ==================== EXCEPTIONS ==================== -->
+                <div class="section" id="sec-exceptions">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">⚠️ Central de Gestão de Exceções</div>
+                                <div class="panel-desc">Desvios operacionais que exigem intervenção</div>
+                            </div>
+                        </div>
+                        <div id="excList"></div>
+                    </div>
+                </div>
+
+                <!-- ==================== CARBON ==================== -->
+                <div class="section" id="sec-carbon">
+                    <div class="g3">
+                        <div class="panel" style="text-align:center">
+                            <div class="panel-title" style="justify-content:center;margin-bottom:14px">🌱 Emissões
+                                Totais (Mês)</div>
+                            <div class="carbon-ring">
+                                <svg width="120" height="120" viewBox="0 0 120 120">
+                                    <circle class="ring-bg" cx="60" cy="60" r="50" />
+                                    <circle class="ring-fill" cx="60" cy="60" r="50" stroke="var(--emerald)"
+                                        stroke-dasharray="314" stroke-dashoffset="94" id="carbonRing" />
+                                </svg>
+                                <div class="carbon-center">
+                                    <div class="carbon-val">2.4k</div>
+                                    <div class="carbon-unit">ton CO₂e</div>
+                                </div>
+                            </div>
+                            <div style="margin-top:14px;font-size:12px;color:var(--text-muted)">Meta anual: 28.000 ton •
+                                Progresso: 70%</div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-title" style="margin-bottom:14px">🏭 Emissões por Modal</div>
+                            <canvas id="carbonModal" height="180"></canvas>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-title" style="margin-bottom:14px">📉 Tendência Mensal</div>
+                            <canvas id="carbonTrend" height="180"></canvas>
+                        </div>
+                    </div>
+                    <div class="panel" style="margin-top:20px">
+                        <div class="panel-title" style="margin-bottom:14px">🌍 Corredores com Maior Pegada de Carbono
+                        </div>
+                        <div class="tbl-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Corredor</th>
+                                        <th>Modal</th>
+                                        <th>Distância</th>
+                                        <th>CO₂e (ton)</th>
+                                        <th>Intensidade (g CO₂/tkm)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Leste Asiático → Pacífico Norte</td>
+                                        <td><span class="mode-tag m-sea">SEA</span></td>
+                                        <td>10.400 km</td>
+                                        <td>842</td>
+                                        <td>8.1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Europa Central → Atlântico Sul</td>
+                                        <td><span class="mode-tag m-sea">SEA</span></td>
+                                        <td>9.800 km</td>
+                                        <td>720</td>
+                                        <td>7.3</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sudeste Asiático → Golfo Pérsico</td>
+                                        <td><span class="mode-tag m-air">AIR</span></td>
+                                        <td>5.200 km</td>
+                                        <td>1.340</td>
+                                        <td>58.2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Interior Continental (Rodoviário)</td>
+                                        <td><span class="mode-tag m-road">ROAD</span></td>
+                                        <td>1.800 km</td>
+                                        <td>245</td>
+                                        <td>62.0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== ROADMAP ==================== -->
+                <div class="section" id="sec-roadmap">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <div class="panel-title">🗺️ Roadmap de Evolução do Sistema</div>
+                                <div class="panel-desc">Funcionalidades recomendadas para tornar o Atlas SCM uma
+                                    plataforma enterprise completa</div>
+                            </div>
+                        </div>
+                        <div id="roadmapContent"></div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-head">
+                <h3 id="modalTitle">Detalhes</h3><button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastBox"></div>
+
+    <script>
+        // ===================== DATA =====================
+        const HUBS = [
+            { code: 'PRT-A', name: 'Porto Alpha', flag: '🇳🇱', x: 48, y: 28, type: 'Porto Marítimo', cap: '14.5M TEU/ano' },
+            { code: 'HUB-S', name: 'Hub Sigma', flag: '🇸🇬', x: 78, y: 58, type: 'Hub Marítimo', cap: '37.2M TEU/ano' },
+            { code: 'PRT-D', name: 'Porto Delta', flag: '🇨🇳', x: 82, y: 38, type: 'Porto Marítimo', cap: '47M TEU/ano' },
+            { code: 'PRT-W', name: 'Porto Westshore', flag: '🇺🇸', x: 14, y: 38, type: 'Porto Marítimo', cap: '9.9M TEU/ano' },
+            { code: 'HUB-Z', name: 'Hub Zenith', flag: '🇺🇸', x: 22, y: 40, type: 'Hub Aéreo', cap: 'SuperHub' },
+            { code: 'HUB-O', name: 'Hub Oasis', flag: '🇦🇪', x: 62, y: 42, type: 'Hub Multimodal', cap: 'Jebel Ali Zone' },
+            { code: 'PRT-B', name: 'Porto Bravo', flag: '🇧🇷', x: 30, y: 70, type: 'Porto Marítimo', cap: '4.1M TEU/ano' },
+            { code: 'HUB-F', name: 'Hub Frankfurt', flag: '🇩🇪', x: 50, y: 26, type: 'Hub Aéreo', cap: 'Cargo Center' },
+            { code: 'PRT-N', name: 'Porto NeoTokyo', flag: '🇯🇵', x: 88, y: 35, type: 'Porto/Aéreo', cap: 'Narita+Yokohama' },
+            { code: 'HUB-K', name: 'Hub Keystone', flag: '🇧🇷', x: 31, y: 68, type: 'Aeroporto Cargo', cap: 'Viracopos+GRU' }
+        ];
+        const CARRIERS = [
+            { name: 'Pacífico Shipping Lines', hq: '🇩🇰 Copenhagen', mode: 'Marítimo', fleet: '730+ navios', coverage: '130 países', otif: 94 },
+            { name: 'Meridian Freight Corp', hq: '🇨🇭 Geneva', mode: 'Marítimo', fleet: '800+ navios', coverage: '155 países', otif: 92 },
+            { name: 'Atlas Global Forwarding', hq: '🇩🇪 Bonn', mode: 'Multimodal', fleet: 'Global', coverage: '220+ países', otif: 96 },
+            { name: 'Nexus Logistics Group', hq: '🇨🇭 Schindellegi', mode: 'Freight Forwarding', fleet: 'Global', coverage: '100 países', otif: 95 },
+            { name: 'IronPath Transit', hq: '🇩🇪 Essen', mode: 'Multimodal', fleet: 'Global', coverage: '140 países', otif: 93 },
+            { name: 'AeroVelo Express', hq: '🇺🇸 Memphis', mode: 'Aéreo', fleet: '680+ aeronaves', coverage: '220+ países', otif: 97 },
+            { name: 'OceanRoute International', hq: '🇫🇷 Marseille', mode: 'Marítimo', fleet: '600+ navios', coverage: '420 portos', otif: 91 },
+            { name: 'SwiftChain Supply Co', hq: '🇺🇸 Atlanta', mode: 'Multimodal', fleet: '590+ aeronaves', coverage: '200+ países', otif: 96 }
+        ];
+        const SUPPLIERS = [
+            { name: 'NovaTech Industries', flag: '🇨🇳', sector: 'Eletrônicos', tier: 'Tier 1', lead: '28d', rating: 4.7 },
+            { name: 'Quantum Semi Corp', flag: '🇹🇼', sector: 'Semicondutores', tier: 'Tier 1', lead: '90d', rating: 4.9 },
+            { name: 'VoltCell Energy', flag: '🇰🇷', sector: 'Baterias', tier: 'Tier 1', lead: '45d', rating: 4.8 },
+            { name: 'PrecisionDrive AG', flag: '🇩🇪', sector: 'Autopeças', tier: 'Tier 1', lead: '21d', rating: 4.6 },
+            { name: 'AutoMotion Ltd', flag: '🇯🇵', sector: 'Automotivo', tier: 'Tier 1', lead: '35d', rating: 4.8 },
+            { name: 'FlexAssembly Pte', flag: '🇸🇬', sector: 'EMS', tier: 'Tier 2', lead: '24d', rating: 4.5 },
+            { name: 'CircuitForge Inc', flag: '🇹🇼', sector: 'Eletrônicos', tier: 'Tier 1', lead: '32d', rating: 4.4 }
+        ];
+        const WAREHOUSES = [
+            { city: 'Rotterdam', flag: '🇳🇱', code: 'PRT-A-DC01', area: 85000, cap: 82, skus: 42500 },
+            { city: 'Singapura', flag: '🇸🇬', code: 'HUB-S-DC01', area: 65000, cap: 91, skus: 38200 },
+            { city: 'Cajamar (SP)', flag: '🇧🇷', code: 'HUB-K-DC01', area: 120000, cap: 76, skus: 68500 },
+            { city: 'Memphis', flag: '🇺🇸', code: 'HUB-Z-HUB', area: 95000, cap: 68, skus: 52100 },
+            { city: 'Frankfurt', flag: '🇩🇪', code: 'HUB-F-DC01', area: 48000, cap: 71, skus: 28400 },
+            { city: 'Dubai', flag: '🇦🇪', code: 'HUB-O-DC01', area: 72000, cap: 88, skus: 41200 },
+            { city: 'Shanghai', flag: '🇨🇳', code: 'PRT-D-DC01', area: 155000, cap: 79, skus: 95800 },
+            { city: 'Extrema (MG)', flag: '🇧🇷', code: 'CNF-DC01', area: 88000, cap: 65, skus: 47600 }
+        ];
+        const INIT_SHIPS = [
+            { id: 'SH001', bl: 'ATX-7784521', customer: 'NovaTech Industries', origin: 'PRT-D', destination: 'PRT-W', mode: 'sea', incoterm: 'FOB', carrier: 'Pacífico Shipping Lines', weight: 12500, value: 850000, status: 'transit', eta: 18, created: Date.now() - 864e5 * 5 },
+            { id: 'SH002', bl: 'MRD-100293', customer: 'Quantum Semi Corp', origin: 'PRT-N', destination: 'PRT-A', mode: 'sea', incoterm: 'CIF', carrier: 'Meridian Freight Corp', weight: 8200, value: 620000, status: 'transit', eta: 12, created: Date.now() - 864e5 * 3 },
+            { id: 'SH003', bl: 'AWB-172-9845', customer: 'CircuitForge Inc', origin: 'HUB-Z', destination: 'HUB-K', mode: 'air', incoterm: 'DDP', carrier: 'AeroVelo Express', weight: 450, value: 185000, status: 'customs', eta: 2, created: Date.now() - 864e5 },
+            { id: 'SH004', bl: 'HLC-5567234', customer: 'AutoMotion Ltd', origin: 'HUB-F', destination: 'PRT-B', mode: 'sea', incoterm: 'CIF', carrier: 'OceanRoute International', weight: 22000, value: 1250000, status: 'delayed', eta: 28, created: Date.now() - 864e5 * 15 },
+            { id: 'SH005', bl: 'AWB-297-4412', customer: 'VoltCell Energy', origin: 'HUB-F', destination: 'HUB-Z', mode: 'air', incoterm: 'DAP', carrier: 'Atlas Global Forwarding', weight: 890, value: 2400000, status: 'transit', eta: 1, created: Date.now() - 864e5 * .5 },
+            { id: 'SH006', bl: 'ORI-4412890', customer: 'FlexAssembly Pte', origin: 'HUB-S', destination: 'PRT-W', mode: 'sea', incoterm: 'FOB', carrier: 'OceanRoute International', weight: 18500, value: 920000, status: 'delivered', eta: 0, created: Date.now() - 864e5 * 10 }
+        ];
+        const ROADMAP = [
+            { phase: 'Fase 1 — Visibilidade (Atual)', status: 'done', items: ['Command Center com KPIs em tempo real', 'Gestão de Embarques (CRUD completo)', 'Track & Trace com timeline', 'Mapa global com hubs e rotas', 'Módulo de Armazéns com capacidade'] },
+            { phase: 'Fase 2 — Controle Operacional', status: 'current', items: ['Gestão de Exceções com SLA', 'Integração EDI/API com carriers', 'Alertas automatizados (e-mail, webhook)', 'Gestão documental (BL, CI, PL, CO)', 'Módulo de Desembaraço Aduaneiro'] },
+            { phase: 'Fase 3 — Inteligência Preditiva', status: 'next', items: ['Demand Forecasting com ML', 'Dynamic Route Optimization', 'Predictive ETA com IA', 'Supplier Risk Scoring', 'Inventory Optimization (safety stock, EOQ)'] },
+            { phase: 'Fase 4 — Sustentabilidade & ESG', status: 'next', items: ['Carbon Footprint por embarque/corredor', 'Scope 3 emissions tracking', 'ESG compliance dashboard', 'Green corridor scoring', 'Relatórios GRI/SASB automáticos'] },
+            { phase: 'Fase 5 — Torre de Controle & Autonomia', status: 'future', items: ['Control Tower unificada (end-to-end)', 'Autonomous exception resolution', 'Digital Twin da supply chain', 'Blockchain para chain-of-custody', 'Multi-echelon inventory visibility'] }
+        ];
+
+        let shipments = JSON.parse(localStorage.getItem('atlas_shipments')) || [...INIT_SHIPS];
+        let charts = {};
+
+        // ===================== NAV =====================
+        const pageMap = {
+            dashboard: ['Command Center', 'Atlas SCM › Visão Global'],
+            shipments: ['Gestão de Embarques', 'Operações › Shipments & Bookings'],
+            tracking: ['Track & Trace', 'Operações › Rastreamento Global'],
+            warehouses: ['Armazéns Globais', 'Operações › Warehouses & DCs'],
+            carriers: ['Transportadoras', 'Parceiros › Carriers'],
+            suppliers: ['Fornecedores Globais', 'Parceiros › Suppliers'],
+            reports: ['Analytics & BI', 'Inteligência › KPIs de Supply Chain'],
+            exceptions: ['Gestão de Exceções', 'Operações › Incidentes & Desvios'],
+            carbon: ['Carbon Tracker', 'ESG › Pegada de Carbono'],
+            roadmap: ['Roadmap de Evolução', 'Estratégia › Próximas Implementações']
+        };
+        document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+            item.addEventListener('click', () => navigateTo(item.dataset.section));
+        });
+        function navigateTo(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const sec = document.getElementById('sec-' + id);
+            if (sec) sec.classList.add('active');
+            const nav = document.querySelector(`.nav-item[data-section="${id}"]`);
+            if (nav) nav.classList.add('active');
+            if (pageMap[id]) { document.getElementById('pageTitle').textContent = pageMap[id][0]; document.getElementById('breadcrumb').textContent = pageMap[id][1] }
+            if (id === 'reports') setTimeout(renderReports, 150);
+            if (id === 'carbon') setTimeout(renderCarbon, 150);
+            if (id === 'roadmap') renderRoadmap();
+            // close mobile sidebar
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('open');
+        }
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
+        }
+
+        // ===================== UTILS =====================
+        function $(id) { return document.getElementById(id) }
+        function modeName(m) { return { sea: 'SEA', air: 'AIR', road: 'ROAD', rail: 'RAIL' }[m] || m }
+        function statusBadge(s) {
+            const m = { pending: ['b-pending', '📋 Aguardando'], transit: ['b-transit', '🚢 Em Trânsito'], customs: ['b-customs', '🛃 Alfândega'], delivered: ['b-delivered', '✅ Entregue'], delayed: ['b-delayed', '⚠️ Atrasado'] };
+            const [c, l] = m[s] || ['b-pending', s];
+            return `<span class="badge ${c}"><span class="dot"></span>${l}</span>`;
+        }
+        function hubName(code) { const h = HUBS.find(x => x.code === code); return h ? `${h.flag} ${h.name}` : code }
+        function fmt$(v) { return '$' + Number(v).toLocaleString('en-US') }
+        function save() { localStorage.setItem('atlas_shipments', JSON.stringify(shipments)) }
+        function toast(msg, err) {
+            const t = document.createElement('div'); t.className = 'toast' + (err ? ' error' : ''); t.innerHTML = (err ? '❌ ' : '✅ ') + msg; $('toastBox').appendChild(t);
+            setTimeout(() => t.remove(), 3500);
+        }
+
+        // ===================== DASHBOARD =====================
+        function renderDashboard() {
+            const active = shipments.filter(s => s.status !== 'delivered').length;
+            const delayed = shipments.filter(s => s.status === 'delayed').length;
+            const otif = shipments.length ? Math.round(((shipments.length - delayed) / shipments.length) * 100) : 0;
+            const avgLead = shipments.length ? Math.round(shipments.reduce((s, x) => s + x.eta, 0) / shipments.length) : 0;
+            const val = shipments.filter(s => s.status !== 'delivered').reduce((s, x) => s + x.value, 0);
+
+            $('k-active').textContent = active;
+            $('k-otif').textContent = otif + '%';
+            $('k-lead').textContent = avgLead + 'd';
+            $('k-exc').textContent = delayed;
+            $('k-value').textContent = fmt$(val);
+            $('k-co2').textContent = Math.round(val / 350) + 't';
+            $('shipBadge').textContent = shipments.length;
+            $('excBadge').textContent = delayed;
+
+            renderMap(); renderRecent(); renderAlerts(); renderDashCharts();
+        }
+        function renderMap() {
+            const c = $('mapHubs'); c.innerHTML = '';
+            const svg = $('routeSvg'); svg.innerHTML = '';
+            // routes
+            const routes = [[0, 2], [2, 1], [1, 3], [3, 4], [5, 6], [7, 0], [2, 8], [6, 9]];
+            routes.forEach(([a, b]) => {
+                const ha = HUBS[a], hb = HUBS[b];
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', ha.x * 10); line.setAttribute('y1', ha.y * 4);
+                line.setAttribute('x2', hb.x * 10); line.setAttribute('y2', hb.y * 4);
+                line.setAttribute('class', 'route-line'); svg.appendChild(line);
+            });
+            HUBS.forEach(h => {
+                const d = document.createElement('div'); d.className = 'hub-dot'; d.style.left = h.x + '%'; d.style.top = h.y + '%'; d.title = `${h.flag} ${h.name} — ${h.type}`; c.appendChild(d);
+                const l = document.createElement('div'); l.className = 'hub-lbl'; l.style.left = h.x + '%'; l.style.top = h.y + '%'; l.textContent = `${h.flag} ${h.code}`; c.appendChild(l);
+            });
+        }
+        function renderRecent() {
+            const tb = $('recentTbl'); const r = shipments.slice(0, 5);
+            if (!r.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">Sem embarques</td></tr>'; return }
+            tb.innerHTML = r.map(s => `<tr><td style="font-family:monospace;color:var(--accent);font-weight:600">${s.bl}</td><td>${hubName(s.origin)} → ${hubName(s.destination)}</td><td><span class="mode-tag m-${s.mode}">${modeName(s.mode)}</span></td><td>${statusBadge(s.status)}</td><td>${s.eta > 0 ? s.eta + 'd' : '✓'}</td></tr>`).join('');
+        }
+        function renderAlerts() {
+            const c = $('alertsBox'); let h = '';
+            shipments.filter(s => s.status === 'delayed').forEach(s => { h += `<div class="exc-card exc-critical"><div class="exc-title">🚨 Atraso Crítico: ${s.bl}</div><div class="exc-meta">${s.customer} • ${s.carrier} • SLA comprometido</div></div>` });
+            shipments.filter(s => s.status === 'customs').forEach(s => { h += `<div class="exc-card exc-warning"><div class="exc-title">🛃 Em Despacho: ${s.bl}</div><div class="exc-meta">${s.customer} • Aguardando liberação fiscal</div></div>` });
+            c.innerHTML = h || '<div class="empty"><div class="empty-icon">✅</div>Nenhuma exceção ativa</div>';
+        }
+        function renderDashCharts() {
+            if (charts.modal) charts.modal.destroy();
+            const modes = { sea: 0, air: 0, road: 0, rail: 0 }; shipments.forEach(s => modes[s.mode] = (modes[s.mode] || 0) + s.weight);
+            charts.modal = new Chart($('chartModal'), { type: 'bar', data: { labels: ['Marítimo', 'Aéreo', 'Rodoviário', 'Ferroviário'], datasets: [{ label: 'Peso (kg)', data: [modes.sea, modes.air, modes.road, modes.rail], backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6'], borderRadius: 6 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#64748b' }, grid: { color: 'rgba(148,163,184,0.06)' } }, x: { ticks: { color: '#64748b' }, grid: { display: false } } } } });
+
+            if (charts.corridor) charts.corridor.destroy();
+            const cor = [{ n: 'Leste Asiático → Pacífico Norte', v: 2850 }, { n: 'Leste Asiático → Europa Central', v: 2140 }, { n: 'Europa → Atlântico Sul', v: 980 }, { n: 'Intra-Ásia', v: 1650 }, { n: 'Transatlântico', v: 720 }];
+            charts.corridor = new Chart($('chartCorridor'), { type: 'bar', data: { labels: cor.map(c => c.n), datasets: [{ label: 'TEU (mil)', data: cor.map(c => c.v), backgroundColor: '#06b6d4', borderRadius: 6 }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(148,163,184,0.06)' } }, y: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } } } } });
+        }
+
+        // ===================== SHIPMENTS =====================
+        function populateForms() {
+            ['f-origin', 'f-dest'].forEach(id => { const sel = $(id); HUBS.forEach(h => { sel.innerHTML += `<option value="${h.code}">${h.flag} ${h.name} (${h.code})</option>` }) });
+            const cs = $('f-carrier'); CARRIERS.forEach(c => { cs.innerHTML += `<option value="${c.name}">${c.name}</option>` });
+        }
+        function createShipment(e) {
+            e.preventDefault();
+            const s = { id: 'SH' + String(shipments.length + 1).padStart(3, '0'), bl: $('f-bl').value, customer: $('f-cust').value, origin: $('f-origin').value, destination: $('f-dest').value, mode: $('f-mode').value, incoterm: $('f-incoterm').value, carrier: $('f-carrier').value, weight: parseFloat($('f-weight').value), value: parseFloat($('f-value').value), status: $('f-status').value, eta: Math.floor(Math.random() * 30) + 3, created: Date.now() };
+            shipments.unshift(s); save(); e.target.reset(); toast('Embarque registrado na rede global'); renderShipsTable(); renderDashboard();
+        }
+        function renderShipsTable() {
+            const tb = $('shipsTbl'); $('shipCount').textContent = shipments.length;
+            if (!shipments.length) { tb.innerHTML = '<tr><td colspan="9" class="empty">Nenhum embarque</td></tr>'; return }
+            tb.innerHTML = shipments.map(s => `<tr><td style="font-family:monospace;color:var(--accent);font-weight:600">${s.bl}</td><td>${s.customer}</td><td>${hubName(s.origin)} → ${hubName(s.destination)}</td><td><span class="mode-tag m-${s.mode}">${modeName(s.mode)}</span></td><td><strong>${s.incoterm}</strong></td><td>${s.carrier}</td><td>${fmt$(s.value)}</td><td>${statusBadge(s.status)}</td><td><button class="btn btn-ghost btn-sm" onclick="viewShip('${s.id}')">Detalhes</button> <button class="btn btn-danger btn-sm" onclick="deleteShip('${s.id}')">✕</button></td></tr>`).join('');
+        }
+        function viewShip(id) {
+            const s = shipments.find(x => x.id === id); if (!s) return;
+            $('modalTitle').textContent = '📦 ' + s.bl;
+            $('modalBody').innerHTML = `<div class="detail-grid"><div class="detail-item"><div class="detail-label">Cliente</div><div class="detail-val">${s.customer}</div></div><div class="detail-item"><div class="detail-label">Operador</div><div class="detail-val">${s.carrier}</div></div><div class="detail-item"><div class="detail-label">Origem</div><div class="detail-val">${hubName(s.origin)}</div></div><div class="detail-item"><div class="detail-label">Destino</div><div class="detail-val">${hubName(s.destination)}</div></div><div class="detail-item"><div class="detail-label">Modal</div><div class="detail-val">${modeName(s.mode)}</div></div><div class="detail-item"><div class="detail-label">Incoterm</div><div class="detail-val">${s.incoterm}</div></div><div class="detail-item"><div class="detail-label">Peso</div><div class="detail-val">${s.weight.toLocaleString()} kg</div></div><div class="detail-item"><div class="detail-label">Valor CIF</div><div class="detail-val">${fmt$(s.value)}</div></div><div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${statusBadge(s.status)}</div></div><div class="detail-item"><div class="detail-label">ETA</div><div class="detail-val">${s.eta > 0 ? s.eta + ' dias' : 'Entregue'}</div></div></div>`;
+            $('modal').classList.add('open');
+        }
+        function deleteShip(id) {
+            if (!confirm('Remover este embarque?')) return;
+            shipments = shipments.filter(s => s.id !== id); save(); renderShipsTable(); renderDashboard(); toast('Embarque removido');
+        }
+        function closeModal() { $('modal').classList.remove('open') }
+        $('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal() });
+
+        // ===================== TRACKING =====================
+        function trackShipment() {
+            const code = $('trackInput').value.trim().toUpperCase();
+            const s = shipments.find(x => x.bl.toUpperCase() === code); const c = $('trackResult');
+            if (!s) { c.innerHTML = '<div class="panel"><div class="empty"><div class="empty-icon">❌</div>Embarque não encontrado</div></div>'; return }
+            const events = [
+                { done: true, t: '📋 Booking Confirmado', m: 'Reserva emitida junto ao carrier', d: 'D-0' },
+                { done: true, t: '🏭 Coleta Realizada', m: `Carga coletada em ${hubName(s.origin)}`, d: 'D+2' },
+                { done: s.status !== 'pending', t: '🛃 Despacho Aduaneiro Origem', m: 'Liberação de exportação concluída', d: 'D+4' },
+                { done: ['transit', 'customs', 'delivered', 'delayed'].includes(s.status), t: `🚢 ${modeName(s.mode)} em Rota`, m: `${hubName(s.origin)} → ${hubName(s.destination)}`, d: 'D+5' },
+                { done: s.status === 'customs' || s.status === 'delivered', t: '🛃 Chegada no Destino', m: `Em despacho em ${hubName(s.destination)}`, d: `D+${Math.max(s.eta - 2, 1)}` },
+                { done: s.status === 'delivered', t: '✅ Entrega Finalizada', m: 'POD assinado pelo consignatário', d: `D+${s.eta}` }
+            ];
+            const sc = { transit: 'var(--accent)', customs: 'var(--amber)', delivered: 'var(--emerald)', delayed: 'var(--rose)', pending: 'var(--text-muted)' };
+            c.innerHTML = `<div class="panel"><div class="panel-head"><div><div class="panel-title">🛰️ ${s.bl}</div><div class="panel-desc">${s.customer} • ${s.carrier} • ${s.incoterm}</div></div><div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">STATUS ATUAL</div><div style="font-size:20px;font-weight:800;color:${sc[s.status]}">${s.status.toUpperCase()}</div></div></div><div style="padding:16px;background:var(--bg-900);border-radius:10px;margin-bottom:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px"><div><div style="font-size:10px;color:var(--text-muted)">ORIGEM</div><div style="font-weight:600">${hubName(s.origin)}</div></div><div style="font-size:20px;color:var(--accent)">→</div><div><div style="font-size:10px;color:var(--text-muted)">DESTINO</div><div style="font-weight:600">${hubName(s.destination)}</div></div><div><div style="font-size:10px;color:var(--text-muted)">MODAL</div><div style="font-weight:600">${modeName(s.mode)}</div></div><div><div style="font-size:10px;color:var(--text-muted)">PESO</div><div style="font-weight:600">${s.weight.toLocaleString()} kg</div></div><div><div style="font-size:10px;color:var(--text-muted)">VALOR</div><div style="font-weight:600">${fmt$(s.value)}</div></div></div><h4 style="margin-bottom:12px;font-size:13px">Linha do Tempo</h4><div class="timeline">${events.map((e, i) => { const active = e.done && i === events.filter(x => x.done).length - 1; return `<div class="tl-item ${e.done ? (active ? 'active' : 'done') : ''}"><div class="tl-dot"></div><div class="tl-title">${e.t}</div><div class="tl-meta">${e.m} • ${e.d}</div></div>` }).join('')}</div></div>`;
+        }
+
+        // ===================== WAREHOUSES =====================
+        function renderWarehouses() {
+            $('wh-count').textContent = WAREHOUSES.length;
+            $('wh-area').textContent = WAREHOUSES.reduce((s, w) => s + w.area, 0).toLocaleString() + ' m²';
+            $('wh-skus').textContent = WAREHOUSES.reduce((s, w) => s + w.skus, 0).toLocaleString();
+            $('whGrid').innerHTML = WAREHOUSES.map(w => {
+                const cls = w.cap > 85 ? 'cap-crit' : w.cap > 70 ? 'cap-warn' : 'cap-ok';
+                const bcls = w.cap > 85 ? 'b-delayed' : w.cap > 70 ? 'b-customs' : 'b-delivered';
+                return `<div class="wh-card"><div class="wh-top"><div><span class="wh-flag">${w.flag}</span><span class="wh-name">${w.city}</span><div class="wh-code">${w.code}</div></div><span class="badge ${bcls}"><span class="dot"></span>${w.cap}%</span></div><div class="cap-bar"><div class="cap-fill ${cls}" style="width:${w.cap}%"></div></div><div class="wh-stats"><span>📐 ${w.area.toLocaleString()} m²</span><span>📦 ${w.skus.toLocaleString()} SKUs</span><span>🆓 ${100 - w.cap}% livre</span></div></div>`
+            }).join('');
+        }
+
+        // ===================== CARRIERS =====================
+        function renderCarriers() {
+            $('carriersTbl').innerHTML = CARRIERS.map(c => {
+                const clr = c.otif >= 95 ? 'var(--emerald)' : c.otif >= 92 ? 'var(--amber)' : 'var(--rose)';
+                return `<tr><td><strong>${c.name}</strong></td><td>${c.hq}</td><td><span class="badge b-pending">${c.mode}</span></td><td>${c.fleet}</td><td>${c.coverage}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:var(--bg-900);border-radius:3px;overflow:hidden"><div style="height:100%;width:${c.otif}%;background:${clr}"></div></div><strong style="font-size:12px">${c.otif}%</strong></div></td></tr>`
+            }).join('');
+        }
+
+        // ===================== SUPPLIERS =====================
+        function renderSuppliers() {
+            $('suppliersTbl').innerHTML = SUPPLIERS.map(s => `<tr><td><strong>${s.name}</strong></td><td>${s.flag}</td><td>${s.sector}</td><td><span class="badge ${s.tier === 'Tier 1' ? 'b-transit' : 'b-pending'}">${s.tier}</span></td><td>${s.lead}</td><td><span style="color:#fbbf24">${'★'.repeat(Math.floor(s.rating))}${'☆'.repeat(5 - Math.floor(s.rating))}</span> <strong style="margin-left:4px">${s.rating}</strong></td></tr>`).join('');
+        }
+
+        // ===================== REPORTS =====================
+        function renderReports() {
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            if (charts.rTEU) charts.rTEU.destroy();
+            charts.rTEU = new Chart($('rTEU'), { type: 'line', data: { labels: months, datasets: [{ label: 'TEU (mil)', data: [420, 485, 510, 495, 540, 612, 678, 645, 720, 698, 760, 820], borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.08)', tension: .4, fill: true, pointRadius: 3, pointBackgroundColor: '#06b6d4' }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(148,163,184,0.06)' } }, x: { ticks: { color: '#64748b' }, grid: { display: false } } } } });
+
+            if (charts.rRev) charts.rRev.destroy();
+            charts.rRev = new Chart($('rRev'), { type: 'doughnut', data: { labels: ['Marítimo', 'Aéreo', 'Rodoviário', 'Ferroviário'], datasets: [{ data: [48, 32, 14, 6], backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 }, padding: 12 } } } } });
+
+            if (charts.rOTIF) charts.rOTIF.destroy();
+            charts.rOTIF = new Chart($('rOTIF'), { type: 'bar', data: { labels: CARRIERS.slice(0, 5).map(c => c.name.split(' ')[0]), datasets: [{ label: 'OTIF %', data: CARRIERS.slice(0, 5).map(c => c.otif), backgroundColor: '#10b981', borderRadius: 6 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { min: 85, max: 100, ticks: { color: '#64748b' }, grid: { color: 'rgba(148,163,184,0.06)' } }, x: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { display: false } } } } });
+
+            if (charts.rCosts) charts.rCosts.destroy();
+            charts.rCosts = new Chart($('rCosts'), { type: 'line', data: { labels: months, datasets: [{ label: 'Frete Marítimo', data: [120, 135, 128, 145, 152, 168, 175, 180, 172, 185, 195, 210], borderColor: '#3b82f6', tension: .3, pointRadius: 2 }, { label: 'Frete Aéreo', data: [85, 92, 98, 105, 112, 118, 125, 122, 128, 135, 142, 150], borderColor: '#f97316', tension: .3, pointRadius: 2 }, { label: 'Armazenagem', data: [45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 82], borderColor: '#10b981', tension: .3, pointRadius: 2 }, { label: 'Despacho Aduaneiro', data: [28, 32, 30, 35, 38, 42, 45, 48, 50, 52, 55, 58], borderColor: '#8b5cf6', tension: .3, pointRadius: 2 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } }, scales: { y: { ticks: { color: '#64748b', callback: v => '$' + v + 'k' }, grid: { color: 'rgba(148,163,184,0.06)' } }, x: { ticks: { color: '#64748b' }, grid: { display: false } } } } });
+        }
+
+        // ===================== EXCEPTIONS =====================
+        function renderExceptions() {
+            const c = $('excList'); const delayed = shipments.filter(s => s.status === 'delayed'); const customs = shipments.filter(s => s.status === 'customs');
+            if (!delayed.length && !customs.length) { c.innerHTML = '<div class="empty"><div class="empty-icon">✅</div>Nenhuma exceção ativa</div>'; return }
+            let h = '';
+            delayed.forEach(s => { const sla = Math.floor(Math.random() * 5) + 2; h += `<div class="exc-card exc-critical"><div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:10px"><div><div class="exc-title" style="color:var(--rose)">🚨 ATRASO CRÍTICO</div><div style="font-family:monospace;color:var(--accent);font-weight:600;margin:4px 0">${s.bl}</div><div class="exc-meta">${s.customer} • ${hubName(s.origin)} → ${hubName(s.destination)}</div></div><div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">SLA QUEBRADO</div><div style="color:var(--rose);font-weight:800;font-size:18px">+${sla}d</div></div></div><div class="exc-actions"><button class="btn btn-ghost btn-sm">📞 Contatar Carrier</button><button class="btn btn-ghost btn-sm">🔄 Replanejar Rota</button><button class="btn btn-primary btn-sm">📧 Notificar Cliente</button></div></div>` });
+            customs.forEach(s => { h += `<div class="exc-card exc-warning"><div class="exc-title" style="color:var(--amber)">🛃 DESPACHO ADUANEIRO PENDENTE</div><div style="font-family:monospace;color:var(--accent);font-weight:600;margin:4px 0">${s.bl}</div><div class="exc-meta">${s.customer} • Aguardando liberação fiscal</div><div class="exc-actions"><button class="btn btn-ghost btn-sm">📄 Enviar Documentação</button><button class="btn btn-primary btn-sm">🔍 Consultar Status</button></div></div>` });
+            c.innerHTML = h;
+        }
+
+        // ===================== CARBON =====================
+        function renderCarbon() {
+            if (charts.cModal) charts.cModal.destroy();
+            charts.cModal = new Chart($('carbonModal'), { type: 'bar', data: { labels: ['Marítimo', 'Aéreo', 'Rodoviário', 'Ferroviário'], datasets: [{ label: 'CO₂e (ton)', data: [1240, 680, 320, 160], backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6'], borderRadius: 6 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#64748b' }, grid: { color: 'rgba(148,163,184,0.06)' } }, x: { ticks: { color: '#64748b' }, grid: { display: false } } } } });
+
+            if (charts.cTrend) charts.cTrend.destroy();
+            charts.cTrend = new Chart($('carbonTrend'), { type: 'line', data: { labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'], datasets: [{ label: 'CO₂e (ton)', data: [2800, 2650, 2700, 2500, 2480, 2400], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', tension: .4, fill: true, pointRadius: 3, pointBackgroundColor: '#10b981' }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(148,163,184,0.06)' } }, x: { ticks: { color: '#64748b' }, grid: { display: false } } } } });
+        }
+
+        // ===================== ROADMAP =====================
+        function renderRoadmap() {
+            const c = $('roadmapContent');
+            c.innerHTML = ROADMAP.map(r => {
+                const icon = r.status === 'done' ? '✅' : r.status === 'current' ? '🔄' : r.status === 'next' ? '🔜' : '🔮';
+                const bcls = r.status === 'done' ? 'b-delivered' : r.status === 'current' ? 'b-transit' : r.status === 'next' ? 'b-customs' : 'b-pending';
+                const label = r.status === 'done' ? 'Concluído' : r.status === 'current' ? 'Em Desenvolvimento' : r.status === 'next' ? 'Próximo' : 'Futuro';
+                return `<div style="margin-bottom:24px;padding:20px;background:var(--bg-900);border-radius:var(--radius);border:1px solid var(--border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px"><h4 style="font-size:15px">${icon} ${r.phase}</h4><span class="badge ${bcls}"><span class="dot"></span>${label}</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px">${r.items.map(item => `<div style="padding:10px 14px;background:var(--bg-800);border-radius:var(--radius-sm);font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:${r.status === 'done' ? 'var(--emerald)' : 'var(--text-muted)'}">${r.status === 'done' ? '✓' : '○'}</span>${item}</div>`).join('')}</div></div>`
+            }).join('');
+        }
+
+        // ===================== SEARCH =====================
+        $('globalSearch').addEventListener('input', function () {
+            const q = this.value.trim().toUpperCase();
+            if (!q) return;
+            const found = shipments.find(s => s.bl.toUpperCase().includes(q) || s.customer.toUpperCase().includes(q));
+            if (found) { navigateTo('tracking'); $('trackInput').value = found.bl; trackShipment() }
+        });
+
+        // ===================== INIT =====================
+        window.addEventListener('DOMContentLoaded', () => {
+            populateForms(); renderDashboard(); renderShipsTable(); renderWarehouses(); renderCarriers(); renderSuppliers(); renderExceptions();
+        });
+    </script>
+</body>
+
+</html>

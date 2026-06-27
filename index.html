@@ -1,916 +1,1854 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Global SCM • Supply Chain Management System</title>
+<meta name="theme-color" content="#0a0e1a">
+<meta name="description" content="Global SCM Enterprise - Supply Chain Management System">
+<title>Global SCM Enterprise | Supply Chain OS</title>
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Global%20SCM%22,%22short_name%22:%22SCM%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230a0e1a%22,%22theme_color%22:%22%230a0e1a%22}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-        --bg-900: #0a0e1a;
-        --bg-800: #111827;
-        --bg-700: #1f2937;
-        --bg-600: #374151;
-        --accent: #00d4ff;
-        --accent-2: #0ea5e9;
-        --accent-3: #06b6d4;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --text: #e5e7eb;
-        --text-muted: #9ca3af;
-        --border: #1f2937;
-    }
-    body {
-        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-        background: var(--bg-900);
-        color: var(--text);
-        display: flex;
-        min-height: 100vh;
-        font-size: 14px;
-    }
-    /* SIDEBAR */
+:root {
+    --bg-900: #0a0e1a;
+    --bg-800: #111827;
+    --bg-700: #1f2937;
+    --bg-600: #374151;
+    --surface: rgba(17, 24, 39, 0.7);
+    --surface-hover: rgba(31, 41, 55, 0.8);
+    --border: rgba(55, 65, 81, 0.5);
+    --text: #e5e7eb;
+    --text-muted: #9ca3af;
+    --accent: #00d4ff;
+    --accent-2: #0ea5e9;
+    --primary: #3b82f6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --purple: #a855f7;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
+    --radius: 12px;
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+    --bg-900: #f9fafb;
+    --bg-800: #ffffff;
+    --bg-700: #f3f4f6;
+    --bg-600: #e5e7eb;
+    --surface: rgba(255, 255, 255, 0.9);
+    --surface-hover: rgba(243, 244, 246, 0.9);
+    --border: rgba(229, 231, 235, 0.8);
+    --text: #111827;
+    --text-muted: #6b7280;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-900);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: background 0.3s, color 0.3s;
+}
+
+[data-theme="dark"] body {
+    background: 
+        radial-gradient(ellipse at top left, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(0, 212, 255, 0.06) 0%, transparent 50%),
+        var(--bg-900);
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 260px;
+    background: var(--bg-800);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    transition: var(--transition);
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+}
+
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg-800);
+    z-index: 10;
+}
+
+.logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+.logo-text h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
+.logo-text p { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+
+.nav-section { padding: 16px 12px 8px; }
+.nav-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    padding: 0 12px 8px;
+    font-weight: 600;
+}
+
+.nav-item {
+    padding: 10px 14px;
+    margin: 2px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    position: relative;
+}
+
+.nav-item:hover { background: var(--surface-hover); color: var(--text); }
+
+.nav-item.active {
+    background: linear-gradient(90deg, rgba(0, 212, 255, 0.15), transparent);
+    color: var(--accent);
+    border-left: 3px solid var(--accent);
+    padding-left: 11px;
+}
+
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-item .badge-count {
+    margin-left: auto;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* MAIN */
+.main { flex: 1; overflow-x: hidden; }
+
+.topbar {
+    background: var(--bg-800);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+}
+
+.page-info h2 { font-size: 20px; font-weight: 700; }
+.page-info .breadcrumb { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+.search-box {
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    padding: 8px 14px 8px 36px;
+    border-radius: 8px;
+    color: var(--text);
+    width: 240px;
+    font-size: 13px;
+    transition: var(--transition);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 12px center;
+}
+
+.search-box:focus { outline: none; border-color: var(--accent); width: 300px; }
+
+.icon-btn {
+    width: 38px; height: 38px;
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    position: relative;
+    color: var(--text);
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+.icon-btn:hover { background: var(--surface-hover); border-color: var(--accent); }
+
+.lang-select {
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.container { padding: 28px 32px; }
+
+.section { display: none; animation: fadeIn 0.4s ease; }
+.section.active { display: block; }
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* KPI CARDS */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: var(--transition);
+}
+
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+}
+
+.kpi-card.success::before { background: linear-gradient(90deg, var(--success), #34d399); }
+.kpi-card.warning::before { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+.kpi-card.danger::before { background: linear-gradient(90deg, var(--danger), #f87171); }
+.kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), #c084fc); }
+
+.kpi-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; }
+.kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.kpi-value { font-size: 26px; font-weight: 800; margin: 8px 0 4px; letter-spacing: -0.5px; }
+.kpi-change { font-size: 12px; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+.kpi-change.up { color: var(--success); }
+.kpi-change.down { color: var(--danger); }
+.kpi-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: rgba(0, 212, 255, 0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+}
+
+.kpi-card.success .kpi-icon { background: rgba(16, 185, 129, 0.1); }
+.kpi-card.warning .kpi-icon { background: rgba(245, 158, 11, 0.1); }
+.kpi-card.danger .kpi-icon { background: rgba(239, 68, 68, 0.1); }
+.kpi-card.purple .kpi-icon { background: rgba(168, 85, 247, 0.1); }
+
+/* PANELS */
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.panel-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.panel-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* TABLES */
+.table-wrapper { overflow-x: auto; border-radius: 8px; }
+
+table { width: 100%; border-collapse: collapse; }
+thead th {
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    background: var(--bg-700);
+}
+tbody td {
+    padding: 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+}
+tbody tr { transition: var(--transition); }
+tbody tr:hover { background: var(--surface-hover); }
+tbody tr:last-child td { border-bottom: none; }
+
+/* BADGES */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+.badge-transit { background: rgba(14, 165, 233, 0.15); color: #38bdf8; }
+.badge-transit .badge-dot { background: #38bdf8; }
+.badge-customs { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.badge-customs .badge-dot { background: #fbbf24; }
+.badge-delivered { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.badge-delivered .badge-dot { background: #34d399; }
+.badge-delayed { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.badge-delayed .badge-dot { background: #f87171; }
+.badge-pending { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); }
+.badge-pending .badge-dot { background: var(--text-muted); }
+
+.mode-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.mode-sea { background: #1e40af; color: #93c5fd; }
+.mode-air { background: #c2410c; color: #fed7aa; }
+.mode-road { background: #166534; color: #bbf7d0; }
+.mode-rail { background: #7e22ce; color: #e9d5ff; }
+
+/* BUTTONS */
+.btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: #001018;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4); }
+
+.btn-secondary {
+    background: var(--bg-700);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--surface-hover); border-color: var(--accent); }
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-sm { padding: 6px 12px; font-size: 11px; }
+
+/* FORMS */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.form-control {
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    transition: var(--transition);
+}
+.form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1); }
+
+/* WORLD MAP */
+.world-map-container {
+    position: relative;
+    background: 
+        radial-gradient(ellipse at center, rgba(13, 27, 42, 0.8) 0%, var(--bg-900) 100%);
+    border-radius: 10px;
+    padding: 20px;
+    overflow: hidden;
+    height: 420px;
+}
+
+[data-theme="light"] .world-map-container {
+    background: radial-gradient(ellipse at center, #e0f2fe 0%, #f0f9ff 100%);
+}
+
+.map-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+
+.hub {
+    position: absolute;
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.25), 0 0 20px rgba(0, 212, 255, 0.5);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+.hub::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+.hub-label {
+    position: absolute;
+    font-size: 10px;
+    color: var(--text);
+    background: var(--bg-800);
+    padding: 2px 6px;
+    border-radius: 4px;
+    transform: translate(-50%, 12px);
+    white-space: nowrap;
+    font-weight: 600;
+    border: 1px solid var(--border);
+}
+
+.route-line {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--primary), transparent);
+    transform-origin: left center;
+    opacity: 0.6;
+    z-index: 1;
+}
+
+.route-line::before {
+    content: '✈';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    font-size: 12px;
+    animation: flyAlong 4s linear infinite;
+    color: var(--accent);
+}
+
+@keyframes flyAlong {
+    0% { left: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+}
+
+/* LAND COST CALC */
+.calc-result {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), rgba(59, 130, 246, 0.08));
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px;
+    margin-top: 16px;
+}
+
+.calc-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 13px;
+}
+
+.calc-row:last-child { border-bottom: none; }
+.calc-row.total { 
+    font-size: 18px; 
+    font-weight: 800; 
+    color: var(--accent); 
+    padding-top: 14px; 
+    margin-top: 8px; 
+    border-top: 2px solid var(--accent);
+    border-bottom: none;
+}
+
+/* CO2 SCORE */
+.co2-comparison {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.co2-option {
+    padding: 14px;
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.co2-option:hover { transform: translateY(-2px); }
+.co2-option.recommended {
+    border-color: var(--success);
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.co2-option .icon { font-size: 24px; margin-bottom: 6px; }
+.co2-option .mode { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.co2-option .value { font-size: 18px; font-weight: 800; margin: 6px 0; }
+.co2-option .unit { font-size: 10px; color: var(--text-muted); }
+
+/* TIMELINE */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+    margin-top: 20px;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--border);
+}
+.timeline-item { position: relative; padding-bottom: 20px; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+    position: absolute;
+    left: -27px; top: 4px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--bg-700);
+    border: 2px solid var(--border);
+}
+.timeline-item.active .timeline-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.2);
+}
+.timeline-item.done .timeline-dot { background: var(--success); border-color: var(--success); }
+.timeline-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.timeline-meta { font-size: 11px; color: var(--text-muted); }
+
+/* WMS ABC CURVE */
+.abc-grid {
+    display: grid;
+    grid-template-columns: 100px 1fr 80px 100px;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-700);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.abc-rank {
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    padding: 8px;
+    border-radius: 8px;
+}
+.abc-rank.a { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.abc-rank.b { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.abc-rank.c { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+.abc-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.abc-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--primary));
+    transition: width 0.5s;
+}
+
+/* RISK MAP */
+.risk-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.risk-low { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.risk-med { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+.risk-high { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+/* DOCS */
+.doc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.doc-item .doc-info { display: flex; align-items: center; gap: 12px; }
+.doc-item .doc-icon { font-size: 24px; }
+.doc-item .doc-name { font-weight: 600; font-size: 13px; }
+.doc-item .doc-meta { font-size: 11px; color: var(--text-muted); }
+
+/* WAREHOUSE */
+.wh-card {
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: var(--transition);
+}
+.wh-card:hover { border-color: var(--accent); }
+
+.wh-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; }
+.wh-flag { font-size: 20px; margin-right: 8px; }
+.wh-name { font-weight: 600; font-size: 13px; }
+.wh-code { font-size: 10px; color: var(--text-muted); font-family: monospace; }
+
+.capacity-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+.capacity-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--warning));
+    transition: width 0.3s;
+}
+.capacity-fill.high { background: linear-gradient(90deg, var(--warning), var(--danger)); }
+
+.wh-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 10px;
+}
+
+/* AI INSIGHTS */
+.insight-card {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(59, 130, 246, 0.08));
+    border-left: 3px solid var(--purple);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.insight-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.insight-body { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+/* TABS */
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 10px 18px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* MODAL */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+.modal-overlay.active { display: flex; }
+.modal {
+    background: var(--bg-800);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 18px; font-weight: 700; }
+.close-btn {
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* TOAST */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-800);
+    border-left: 4px solid var(--success);
+    padding: 14px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    z-index: 3000;
+    animation: slideIn 0.3s;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 280px;
+}
+
+@keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+/* MENU TOGGLE */
+.menu-toggle {
+    display: none;
+    width: 38px; height: 38px;
+    background: var(--bg-700);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .co2-comparison { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+    .menu-toggle { display: flex; align-items: center; justify-content: center; }
     .sidebar {
-        width: 260px;
-        background: linear-gradient(180deg, #0d1321 0%, #0a0e1a 100%);
-        padding: 24px 16px;
-        border-right: 1px solid var(--border);
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow-y: auto;
-    }
-    .logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 32px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid var(--border);
-    }
-    .logo-icon {
-        width: 36px; height: 36px;
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-        border-radius: 8px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 20px;
-    }
-    .logo-text h1 { font-size: 15px; color: var(--text); font-weight: 700; letter-spacing: 0.5px; }
-    .logo-text p { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-    .nav-section-title {
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        color: var(--text-muted);
-        margin: 20px 8px 10px;
-    }
-    .nav-item {
-        padding: 11px 14px;
-        margin: 2px 0;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 13px;
-        color: var(--text-muted);
-    }
-    .nav-item:hover { background: var(--bg-700); color: var(--text); }
-    .nav-item.active {
-        background: linear-gradient(90deg, rgba(0,212,255,0.15), transparent);
-        color: var(--accent);
-        border-left: 3px solid var(--accent);
-        padding-left: 11px;
-    }
-    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-
-    /* MAIN */
-    .main { flex: 1; padding: 28px 36px; overflow-x: hidden; }
-    .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 28px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid var(--border);
-    }
-    .topbar h2 { font-size: 22px; font-weight: 600; }
-    .topbar .breadcrumb { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-    .topbar-actions { display: flex; gap: 12px; align-items: center; }
-    .search-box {
-        background: var(--bg-800);
-        border: 1px solid var(--border);
-        padding: 8px 14px;
-        border-radius: 8px;
-        color: var(--text);
-        width: 260px;
-        font-size: 13px;
-    }
-    .search-box:focus { outline: none; border-color: var(--accent); }
-    .btn-icon {
-        width: 38px; height: 38px;
-        background: var(--bg-800);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer;
-        position: relative;
-    }
-    .badge-dot {
-        position: absolute; top: 8px; right: 8px;
-        width: 8px; height: 8px;
-        background: var(--danger);
-        border-radius: 50%;
-        border: 2px solid var(--bg-900);
-    }
-
-    /* SECTIONS */
-    .section { display: none; animation: fadeIn 0.4s ease; }
-    .section.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* KPI CARDS */
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-    .kpi-card {
-        background: var(--bg-800);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
-    }
-    .kpi-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 2px;
-        background: var(--accent);
-    }
-    .kpi-card.success::before { background: var(--success); }
-    .kpi-card.warning::before { background: var(--warning); }
-    .kpi-card.danger::before { background: var(--danger); }
-    .kpi-label {
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--text-muted);
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .kpi-value {
-        font-size: 26px;
-        font-weight: 700;
-        color: var(--text);
-        margin-bottom: 4px;
-    }
-    .kpi-change {
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-    .kpi-change.up { color: var(--success); }
-    .kpi-change.down { color: var(--danger); }
-    .kpi-icon {
-        position: absolute;
-        top: 20px; right: 20px;
-        font-size: 24px;
-        opacity: 0.3;
-    }
-
-    /* PANELS */
-    .panel {
-        background: var(--bg-800);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 22px;
-        margin-bottom: 20px;
-    }
-    .panel-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 18px;
-    }
-    .panel-title { font-size: 15px; font-weight: 600; }
-    .panel-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    @media (max-width: 1200px) {
-        .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    }
-
-    /* TABLES */
-    table { width: 100%; border-collapse: collapse; }
-    thead th {
-        text-align: left;
-        padding: 12px;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--text-muted);
-        border-bottom: 1px solid var(--border);
-        font-weight: 600;
-    }
-    tbody td {
-        padding: 14px 12px;
-        font-size: 13px;
-        border-bottom: 1px solid var(--border);
-    }
-    tbody tr:hover { background: rgba(0,212,255,0.03); }
-    tbody tr:last-child td { border-bottom: none; }
-
-    /* BADGES */
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .badge-dot-sm {
-        width: 6px; height: 6px; border-radius: 50%;
-    }
-    .badge.transit { background: rgba(14,165,233,0.15); color: #38bdf8; }
-    .badge.transit .badge-dot-sm { background: #38bdf8; }
-    .badge.customs { background: rgba(245,158,11,0.15); color: #fbbf24; }
-    .badge.customs .badge-dot-sm { background: #fbbf24; }
-    .badge.delivered { background: rgba(16,185,129,0.15); color: #34d399; }
-    .badge.delivered .badge-dot-sm { background: #34d399; }
-    .badge.delayed { background: rgba(239,68,68,0.15); color: #f87171; }
-    .badge.delayed .badge-dot-sm { background: #f87171; }
-    .badge.pending { background: rgba(156,163,175,0.15); color: #9ca3af; }
-    .badge.pending .badge-dot-sm { background: #9ca3af; }
-
-    .mode-badge {
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-    }
-    .mode-sea { background: #1e3a8a; color: #93c5fd; }
-    .mode-air { background: #7c2d12; color: #fdba74; }
-    .mode-road { background: #365314; color: #bef264; }
-    .mode-rail { background: #581c87; color: #d8b4fe; }
-
-    /* WORLD MAP SVG */
-    .world-map-container {
-        position: relative;
-        background: radial-gradient(ellipse at center, #0d1b2a 0%, #0a0e1a 100%);
-        border-radius: 10px;
-        padding: 20px;
-        overflow: hidden;
-    }
-    .map-overlay {
-        position: absolute;
-        inset: 0;
-        background-image:
-            linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
-        background-size: 40px 40px;
-        pointer-events: none;
-    }
-    .hub {
-        position: absolute;
-        width: 10px; height: 10px;
-        background: var(--accent);
-        border-radius: 50%;
-        box-shadow: 0 0 0 4px rgba(0,212,255,0.25);
-        cursor: pointer;
-        transform: translate(-50%, -50%);
-    }
-    .hub::after {
-        content: '';
-        position: absolute;
-        inset: -4px;
-        border: 1px solid var(--accent);
-        border-radius: 50%;
-        opacity: 0;
-        animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-        0% { transform: scale(1); opacity: 0.8; }
-        100% { transform: scale(2.5); opacity: 0; }
-    }
-    .hub-label {
-        position: absolute;
-        font-size: 10px;
-        color: var(--text);
-        background: rgba(10,14,26,0.8);
-        padding: 2px 6px;
-        border-radius: 4px;
-        transform: translate(-50%, 6px);
-        white-space: nowrap;
-    }
-    .route-line {
-        position: absolute;
-        height: 1px;
-        background: linear-gradient(90deg, var(--accent), transparent);
-        transform-origin: left center;
-        opacity: 0.5;
-    }
-
-    /* FORMS */
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-    }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group.full { grid-column: 1 / -1; }
-    .form-group label {
-        font-size: 12px;
-        color: var(--text-muted);
-        font-weight: 500;
-    }
-    .form-control {
-        background: var(--bg-900);
-        border: 1px solid var(--border);
-        padding: 10px 12px;
-        border-radius: 8px;
-        color: var(--text);
-        font-size: 13px;
-        font-family: inherit;
-    }
-    .form-control:focus { outline: none; border-color: var(--accent); }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-        color: #001018;
-        padding: 11px 24px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 13px;
-        transition: all 0.2s;
-    }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,212,255,0.3); }
-    .btn-secondary {
-        background: var(--bg-700);
-        color: var(--text);
-        padding: 11px 24px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        font-size: 13px;
-    }
-
-    /* TRACKING TIMELINE */
-    .timeline {
-        position: relative;
-        padding-left: 30px;
-    }
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 8px;
-        top: 8px;
-        bottom: 8px;
-        width: 2px;
-        background: var(--border);
-    }
-    .timeline-item {
-        position: relative;
-        padding-bottom: 20px;
-    }
-    .timeline-item:last-child { padding-bottom: 0; }
-    .timeline-dot {
-        position: absolute;
-        left: -27px;
-        top: 4px;
-        width: 14px; height: 14px;
-        border-radius: 50%;
-        background: var(--bg-700);
-        border: 2px solid var(--border);
-    }
-    .timeline-item.active .timeline-dot {
-        background: var(--accent);
-        border-color: var(--accent);
-        box-shadow: 0 0 0 4px rgba(0,212,255,0.2);
-    }
-    .timeline-item.done .timeline-dot {
-        background: var(--success);
-        border-color: var(--success);
-    }
-    .timeline-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-    .timeline-meta { font-size: 11px; color: var(--text-muted); }
-
-    /* WAREHOUSE CARDS */
-    .wh-card {
-        background: var(--bg-900);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 16px;
-        margin-bottom: 10px;
-    }
-    .wh-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 10px;
-    }
-    .wh-flag { font-size: 18px; margin-right: 8px; }
-    .wh-name { font-weight: 600; font-size: 13px; }
-    .wh-code { font-size: 11px; color: var(--text-muted); font-family: monospace; }
-    .capacity-bar {
-        height: 6px;
-        background: var(--bg-700);
-        border-radius: 3px;
-        overflow: hidden;
-        margin-top: 6px;
-    }
-    .capacity-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--success), var(--warning));
-        transition: width 0.3s;
-    }
-    .capacity-fill.high { background: linear-gradient(90deg, var(--warning), var(--danger)); }
-    .wh-stats {
-        display: flex;
-        justify-content: space-between;
-        font-size: 11px;
-        color: var(--text-muted);
-        margin-top: 6px;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 40px;
-        color: var(--text-muted);
-    }
-
-    .toast {
         position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background: var(--bg-700);
-        border-left: 4px solid var(--success);
-        padding: 14px 20px;
-        border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        left: -280px;
+        top: 0;
         z-index: 1000;
-        animation: slideIn 0.3s;
-        font-size: 13px;
+        box-shadow: var(--shadow-lg);
     }
-    @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+    .sidebar.active { left: 0; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .container { padding: 20px 16px; }
+    .topbar { padding: 14px 16px; }
+    .search-box { width: 140px; }
+    .search-box:focus { width: 180px; }
+    .co2-comparison { grid-template-columns: 1fr; }
+}
 
-    .modal-overlay {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.7);
-        display: none;
-        align-items: center; justify-content: center;
-        z-index: 100;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-        background: var(--bg-800);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 28px;
-        max-width: 560px;
-        width: 90%;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--border);
-    }
-    .close-btn {
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        cursor: pointer;
-        font-size: 20px;
-    }
+@media (max-width: 600px) {
+    .topbar-actions { gap: 6px; }
+    .search-box { display: none; }
+    .kpi-grid { grid-template-columns: 1fr; }
+    .page-info h2 { font-size: 16px; }
+}
+
+/* CHART */
+.chart-container { position: relative; height: 280px; }
+
+/* SCROLL */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-900); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* PRINT */
+@media print {
+    .sidebar, .topbar, .icon-btn, .btn { display: none !important; }
+    .main { margin: 0; }
+    .panel { break-inside: avoid; }
+}
 </style>
 </head>
 <body>
 
-<div class="sidebar">
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
     <div class="logo">
         <div class="logo-icon">🌐</div>
         <div class="logo-text">
-            <h1>GLOBAL SCM</h1>
-            <p>Supply Chain OS</p>
+            <h1>Supply Chain - SCM</h1>
+            <p data-i18n="tagline">Enterprise Edition</p>
         </div>
     </div>
 
-    <div class="nav-section-title">Operações</div>
-    <div class="nav-item active" onclick="showSection('dashboard', this)">
-        <span class="icon">📊</span> Command Center
-    </div>
-    <div class="nav-item" onclick="showSection('shipments', this)">
-        <span class="icon">📦</span> Embarques
-    </div>
-    <div class="nav-item" onclick="showSection('tracking', this)">
-        <span class="icon">🛰️</span> Rastreamento
-    </div>
-    <div class="nav-item" onclick="showSection('warehouses', this)">
-        <span class="icon">🏭</span> Armazéns Globais
-    </div>
-
-    <div class="nav-section-title">Parceiros</div>
-    <div class="nav-item" onclick="showSection('carriers', this)">
-        <span class="icon">🚢</span> Transportadoras
-    </div>
-    <div class="nav-item" onclick="showSection('suppliers', this)">
-        <span class="icon">🏢</span> Fornecedores
+    <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav.operations">Operações</div>
+        <div class="nav-item active" onclick="showSection('dashboard', this)">
+            <span class="icon">📊</span><span data-i18n="nav.dashboard">Command Center</span>
+        </div>
+        <div class="nav-item" onclick="showSection('shipments', this)">
+            <span class="icon">📦</span><span data-i18n="nav.shipments">Embarques</span>
+        </div>
+        <div class="nav-item" onclick="showSection('tracking', this)">
+            <span class="icon">🛰️</span><span data-i18n="nav.tracking">Rastreamento</span>
+        </div>
+        <div class="nav-item" onclick="showSection('map', this)">
+            <span class="icon">🗺️</span><span data-i18n="nav.map">Mapa Global</span>
+        </div>
     </div>
 
-    <div class="nav-section-title">Analytics</div>
-    <div class="nav-item" onclick="showSection('reports', this)">
-        <span class="icon">📈</span> Relatórios & KPIs
+    <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav.logistics">Logística & Inventário</div>
+        <div class="nav-item" onclick="showSection('warehouses', this)">
+            <span class="icon">🏭</span><span data-i18n="nav.warehouses">Armazéns</span>
+        </div>
+        <div class="nav-item" onclick="showSection('wms', this)">
+            <span class="icon">📋</span><span data-i18n="nav.wms">WMS & Curva ABC</span>
+        </div>
+        <div class="nav-item" onclick="showSection('landed', this)">
+            <span class="icon">💰</span><span data-i18n="nav.landed">Landed Cost</span>
+        </div>
+        <div class="nav-item" onclick="showSection('docs', this)">
+            <span class="icon">📄</span><span data-i18n="nav.docs">Comex Docs</span>
+        </div>
     </div>
-    <div class="nav-item" onclick="showSection('exceptions', this)">
-        <span class="icon">⚠️</span> Gestão de Exceções
+
+    <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav.intelligence">Inteligência</div>
+        <div class="nav-item" onclick="showSection('ai', this)">
+            <span class="icon">🤖</span><span data-i18n="nav.ai">IA Preditiva</span>
+        </div>
+        <div class="nav-item" onclick="showSection('esg', this)">
+            <span class="icon">🌱</span><span data-i18n="nav.esg">ESG & CO₂</span>
+        </div>
+        <div class="nav-item" onclick="showSection('risk', this)">
+            <span class="icon">⚠️</span><span data-i18n="nav.risk">Risco Geopolítico</span>
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav.partners">Parceiros</div>
+        <div class="nav-item" onclick="showSection('carriers', this)">
+            <span class="icon">🚢</span><span data-i18n="nav.carriers">Transportadoras</span>
+        </div>
+        <div class="nav-item" onclick="showSection('suppliers', this)">
+            <span class="icon">🏢</span><span data-i18n="nav.suppliers">Fornecedores</span>
+        </div>
+        <div class="nav-item" onclick="showSection('portal', this)">
+            <span class="icon">👥</span><span data-i18n="nav.portal">Portal Multiusuário</span>
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-section-title" data-i18n="nav.analytics">Analytics</div>
+        <div class="nav-item" onclick="showSection('reports', this)">
+            <span class="icon">📈</span><span data-i18n="nav.reports">Relatórios</span>
+        </div>
+        <div class="nav-item" onclick="showSection('exceptions', this)">
+            <span class="icon">🚨</span><span data-i18n="nav.exceptions">Exceções</span>
+            <span class="badge-count" id="exceptionsBadge">0</span>
+        </div>
     </div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
     <div class="topbar">
-        <div>
-            <h2 id="pageTitle">Command Center</h2>
-            <div class="breadcrumb" id="breadcrumb">Supply Chain Management › Visão Global</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="page-info">
+                <h2 id="pageTitle" data-i18n="page.dashboard.title">Command Center</h2>
+                <div class="breadcrumb" id="breadcrumb" data-i18n="page.dashboard.sub">Supply Chain Management › Visão Global</div>
+            </div>
         </div>
         <div class="topbar-actions">
-            <input type="text" class="search-box" placeholder="🔍 Buscar BL, container, pedido...">
-            <div class="btn-icon" title="Notificações">
-                🔔<span class="badge-dot"></span>
-            </div>
-            <div class="btn-icon" title="Usuário">👤</div>
+            <input type="text" class="search-box" placeholder="Buscar BL, pedido, container..." data-i18n-placeholder="search">
+            <select class="lang-select" onchange="changeLanguage(this.value)">
+                <option value="pt">🇧🇷 PT</option>
+                <option value="en">🇺🇸 EN</option>
+                <option value="es">🇪🇸 ES</option>
+            </select>
+            <button class="icon-btn" onclick="toggleTheme()" title="Alternar tema">🌓</button>
+            <button class="icon-btn" onclick="exportData()" title="Exportar dados">⬇️</button>
+            <button class="icon-btn" onclick="window.print()" title="Imprimir">🖨️</button>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="section active">
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <span class="kpi-icon">📦</span>
-                <div class="kpi-label">Embarques Ativos</div>
-                <div class="kpi-value" id="kpiActive">0</div>
-                <div class="kpi-change up">▲ 12.4% vs. mês anterior</div>
+    <div class="container">
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="section active">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-label" data-i18n="kpi.active">Embarques Ativos</div>
+                        <div class="kpi-icon">📦</div>
+                    </div>
+                    <div class="kpi-value" id="kpiActive">0</div>
+                    <div class="kpi-change up">▲ 12.4% vs mês anterior</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-header">
+                        <div class="kpi-label">OTIF Rate</div>
+                        <div class="kpi-icon">✅</div>
+                    </div>
+                    <div class="kpi-value" id="kpiOTIF">0%</div>
+                    <div class="kpi-change up">▲ 3.2pp • Meta: 95%</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-header">
+                        <div class="kpi-label" data-i18n="kpi.leadtime">Lead Time Médio</div>
+                        <div class="kpi-icon">⏱️</div>
+                    </div>
+                    <div class="kpi-value" id="kpiLeadTime">0 d</div>
+                    <div class="kpi-change down">▼ 1.8 dias</div>
+                </div>
+                <div class="kpi-card danger">
+                    <div class="kpi-header">
+                        <div class="kpi-label" data-i18n="kpi.exceptions">Exceções</div>
+                        <div class="kpi-icon">⚠️</div>
+                    </div>
+                    <div class="kpi-value" id="kpiExceptions">0</div>
+                    <div class="kpi-change">Atrasos & Avarias</div>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="kpi-header">
+                        <div class="kpi-label">Faturamento Total</div>
+                        <div class="kpi-icon">💵</div>
+                    </div>
+                    <div class="kpi-value" id="kpiRevenue">R$ 0</div>
+                    <div class="kpi-change up">Meta: R$ 182.853,22</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-header">
+                        <div class="kpi-label">CO₂ Total (ton)</div>
+                        <div class="kpi-icon">🌱</div>
+                    </div>
+                    <div class="kpi-value" id="kpiCO2">0</div>
+                    <div class="kpi-change">Redução -8% YoY</div>
+                </div>
             </div>
-            <div class="kpi-card success">
-                <span class="kpi-icon">✅</span>
-                <div class="kpi-label">OTIF (On-Time In-Full)</div>
-                <div class="kpi-value" id="kpiOTIF">0%</div>
-                <div class="kpi-change up">▲ 3.2pp • Meta: 95%</div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">🗺️ Rede Logística Global</div>
+                            <div class="panel-subtitle">Hubs ativos e rotas em tempo real</div>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" onclick="showSection('map', document.querySelectorAll('.nav-item')[3])">Expandir →</button>
+                    </div>
+                    <div class="world-map-container" style="height:380px;">
+                        <div class="map-grid"></div>
+                        <svg width="100%" height="100%" viewBox="0 0 1000 400" preserveAspectRatio="none" style="position:absolute;inset:0;">
+                            <path d="M 150 120 Q 200 100 260 130 L 280 180 Q 250 220 200 210 Z" fill="var(--bg-600)" opacity="0.4"/>
+                            <path d="M 220 230 Q 260 240 280 300 L 250 340 Q 220 320 210 270 Z" fill="var(--bg-600)" opacity="0.4"/>
+                            <path d="M 420 100 Q 520 80 600 120 L 620 180 Q 560 200 480 190 Z" fill="var(--bg-600)" opacity="0.4"/>
+                            <path d="M 440 200 Q 500 210 540 270 L 510 320 Q 460 310 440 260 Z" fill="var(--bg-600)" opacity="0.4"/>
+                            <path d="M 620 120 Q 780 90 880 140 L 900 220 Q 820 250 720 230 Q 650 210 620 180 Z" fill="var(--bg-600)" opacity="0.4"/>
+                            <path d="M 780 280 Q 850 270 900 310 L 880 340 Q 820 350 790 330 Z" fill="var(--bg-600)" opacity="0.4"/>
+                        </svg>
+                        <div id="mapHubsMini"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">📊 Vendas por Região</div>
+                            <div class="panel-subtitle">Baseline do histórico operacional</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartRegion"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="kpi-card warning">
-                <span class="kpi-icon">⏱️</span>
-                <div class="kpi-label">Lead Time Médio</div>
-                <div class="kpi-value" id="kpiLeadTime">0 d</div>
-                <div class="kpi-change down">▼ 1.8 dias</div>
+
+            <div class="grid-2" style="margin-top:20px;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">📋 Embarques Recentes</div>
+                            <div class="panel-subtitle">Últimas movimentações</div>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" onclick="showSection('shipments', document.querySelectorAll('.nav-item')[1])">Ver todos →</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>BL / AWB</th>
+                                    <th>Rota</th>
+                                    <th>Modal</th>
+                                    <th>Status</th>
+                                    <th>ETA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentShipments"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">🤖 IA - Insights Preditivos</div>
+                            <div class="panel-subtitle">Análises em tempo real</div>
+                        </div>
+                    </div>
+                    <div id="aiInsights"></div>
+                </div>
             </div>
-            <div class="kpi-card danger">
-                <span class="kpi-icon">⚠️</span>
-                <div class="kpi-label">Exceções Abertas</div>
-                <div class="kpi-value" id="kpiExceptions">0</div>
-                <div class="kpi-change down">Atrasos & Avarias</div>
+
+            <div class="panel" style="margin-top:20px;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📈 Performance por Corredor Logístico</div>
+                        <div class="panel-subtitle">Principais rotas internacionais</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartCorridor"></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="grid-2">
+        <!-- SHIPMENTS -->
+        <div id="shipments" class="section">
             <div class="panel">
                 <div class="panel-header">
                     <div>
-                        <div class="panel-title">🗺️ Rede Logística Global</div>
-                        <div class="panel-subtitle">Hubs ativos e rotas em tempo real</div>
+                        <div class="panel-title">➕ Novo Embarque</div>
+                        <div class="panel-subtitle">Registre uma operação global</div>
                     </div>
                 </div>
-                <div class="world-map-container" style="height: 380px;">
-                    <div class="map-overlay"></div>
+                <form id="shipmentForm" onsubmit="createShipment(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nº BL / AWB</label>
+                            <input type="text" class="form-control" id="blNumber" placeholder="Ex: MAEU1234567" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cliente / Shipper</label>
+                            <select class="form-control" id="customer" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Origem</label>
+                            <select class="form-control" id="origin" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Destino</label>
+                            <select class="form-control" id="destination" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Modal</label>
+                            <select class="form-control" id="mode" required>
+                                <option value="sea">🚢 Marítimo (FCL/LCL)</option>
+                                <option value="air">✈️ Aéreo</option>
+                                <option value="road">🚛 Rodoviário</option>
+                                <option value="rail">🚆 Ferroviário</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Incoterm</label>
+                            <select class="form-control" id="incoterm" required>
+                                <option value="EXW">EXW - Ex Works</option>
+                                <option value="FOB" selected>FOB - Free On Board</option>
+                                <option value="CIF">CIF - Cost, Insurance & Freight</option>
+                                <option value="DDP">DDP - Delivered Duty Paid</option>
+                                <option value="DAP">DAP - Delivered At Place</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Operador Logístico</label>
+                            <select class="form-control" id="carrier" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Produto</label>
+                            <select class="form-control" id="product" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Peso (kg)</label>
+                            <input type="number" class="form-control" id="weight" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Distância (km)</label>
+                            <input type="number" class="form-control" id="distance" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor CIF (USD)</label>
+                            <input type="number" class="form-control" id="valueUSD" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select class="form-control" id="status" required>
+                                <option value="pending">📋 Aguardando Coleta</option>
+                                <option value="transit">🚢 Em Trânsito</option>
+                                <option value="customs">🛃 Despacho Aduaneiro</option>
+                                <option value="delivered">✅ Entregue</option>
+                                <option value="delayed">⚠️ Atrasado</option>
+                            </select>
+                        </div>
+                        <div class="form-group full" style="margin-top:16px;display:flex;gap:10px;">
+                            <button type="submit" class="btn btn-primary">🚀 Registrar Embarque</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('shipmentForm').reset()">Limpar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📦 Embarques Cadastrados</div>
+                        <div class="panel-subtitle">Total: <span id="shipmentsCount">0</span> operações</div>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="exportShipmentsCSV()">📊 Exportar CSV</button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>BL / AWB</th>
+                                <th>Cliente</th>
+                                <th>Rota</th>
+                                <th>Modal</th>
+                                <th>Incoterm</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shipmentsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRACKING -->
+        <div id="tracking" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🛰️ Rastreamento de Embarque</div>
+                        <div class="panel-subtitle">Insira o BL, AWB ou Container</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:12px;max-width:600px;">
+                    <input type="text" class="form-control" id="trackInput" placeholder="Ex: MAEU1234567" style="flex:1;">
+                    <button class="btn btn-primary" onclick="trackShipment()">Rastrear</button>
+                </div>
+            </div>
+            <div id="trackResult"></div>
+        </div>
+
+        <!-- GLOBAL MAP -->
+        <div id="map" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🗺️ Mapa Global Interativo</div>
+                        <div class="panel-subtitle">Rotas ativas e hubs logísticos em tempo real</div>
+                    </div>
+                </div>
+                <div class="world-map-container" style="height:500px;">
+                    <div class="map-grid"></div>
                     <svg width="100%" height="100%" viewBox="0 0 1000 400" preserveAspectRatio="none" style="position:absolute;inset:0;">
-                        <!-- Continentes estilizados -->
-                        <path d="M 150 120 Q 200 100 260 130 L 280 180 Q 250 220 200 210 Z" fill="#1f2937" opacity="0.6"/>
-                        <path d="M 220 230 Q 260 240 280 300 L 250 340 Q 220 320 210 270 Z" fill="#1f2937" opacity="0.6"/>
-                        <path d="M 420 100 Q 520 80 600 120 L 620 180 Q 560 200 480 190 Z" fill="#1f2937" opacity="0.6"/>
-                        <path d="M 440 200 Q 500 210 540 270 L 510 320 Q 460 310 440 260 Z" fill="#1f2937" opacity="0.6"/>
-                        <path d="M 620 120 Q 780 90 880 140 L 900 220 Q 820 250 720 230 Q 650 210 620 180 Z" fill="#1f2937" opacity="0.6"/>
-                        <path d="M 780 280 Q 850 270 900 310 L 880 340 Q 820 350 790 330 Z" fill="#1f2937" opacity="0.6"/>
+                        <path d="M 150 120 Q 200 100 260 130 L 280 180 Q 250 220 200 210 Z" fill="var(--bg-600)" opacity="0.5"/>
+                        <path d="M 220 230 Q 260 240 280 300 L 250 340 Q 220 320 210 270 Z" fill="var(--bg-600)" opacity="0.5"/>
+                        <path d="M 420 100 Q 520 80 600 120 L 620 180 Q 560 200 480 190 Z" fill="var(--bg-600)" opacity="0.5"/>
+                        <path d="M 440 200 Q 500 210 540 270 L 510 320 Q 460 310 440 260 Z" fill="var(--bg-600)" opacity="0.5"/>
+                        <path d="M 620 120 Q 780 90 880 140 L 900 220 Q 820 250 720 230 Q 650 210 620 180 Z" fill="var(--bg-600)" opacity="0.5"/>
+                        <path d="M 780 280 Q 850 270 900 310 L 880 340 Q 820 350 790 330 Z" fill="var(--bg-600)" opacity="0.5"/>
                     </svg>
-                    <div id="mapHubs"></div>
+                    <div id="mapHubsFull"></div>
+                    <div id="mapRoutes"></div>
                 </div>
+                <div style="margin-top:20px;">
+                    <h4 style="margin-bottom:12px;font-size:14px;">📍 Hubs Estratégicos</h4>
+                    <div class="grid-4" id="hubsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WAREHOUSES -->
+        <div id="warehouses" class="section">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-label">Armazéns Ativos</div><div class="kpi-icon">🏭</div></div>
+                    <div class="kpi-value" id="whCount">0</div>
+                    <div class="kpi-change">Em 6 regiões</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-header"><div class="kpi-label">Capacidade Total</div><div class="kpi-icon">📊</div></div>
+                    <div class="kpi-value" id="whCapacity">0 m²</div>
+                    <div class="kpi-change up">Ocupação média: 74%</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-header"><div class="kpi-label">SKUs em Estoque</div><div class="kpi-icon">📦</div></div>
+                    <div class="kpi-value" id="whSKUs">0</div>
+                    <div class="kpi-change">Inventário global</div>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="kpi-header"><div class="kpi-label">Inventory Turnover</div><div class="kpi-icon">🔄</div></div>
+                    <div class="kpi-value">9.2x</div>
+                    <div class="kpi-change up">Meta: 8-12x/ano</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🌐 Rede de Armazéns Globais</div>
+                        <div class="panel-subtitle">Distribuição estratégica</div>
+                    </div>
+                </div>
+                <div id="warehousesList"></div>
+            </div>
+        </div>
+
+        <!-- WMS & ABC CURVE -->
+        <div id="wms" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📊 Curva ABC de Produtos</div>
+                        <div class="panel-subtitle">Análise Pareto - 80/20 de valor x giro</div>
+                    </div>
+                </div>
+                <div class="grid-3">
+                    <div class="kpi-card danger">
+                        <div class="kpi-label">Classe A (20% SKUs)</div>
+                        <div class="kpi-value">80%</div>
+                        <div class="kpi-change">do valor total</div>
+                    </div>
+                    <div class="kpi-card warning">
+                        <div class="kpi-label">Classe B (30% SKUs)</div>
+                        <div class="kpi-value">15%</div>
+                        <div class="kpi-change">do valor total</div>
+                    </div>
+                    <div class="kpi-card success">
+                        <div class="kpi-label">Classe C (50% SKUs)</div>
+                        <div class="kpi-value">5%</div>
+                        <div class="kpi-change">do valor total</div>
+                    </div>
+                </div>
+                <div style="margin-top:20px;" id="abcList"></div>
             </div>
 
             <div class="panel">
                 <div class="panel-header">
                     <div>
-                        <div class="panel-title">📊 Volume por Modal</div>
-                        <div class="panel-subtitle">TEU / Toneladas por tipo de transporte</div>
+                        <div class="panel-title">📈 Ponto de Pedido Automático</div>
+                        <div class="panel-subtitle">Reposição calculada por SKU</div>
                     </div>
                 </div>
-                <canvas id="chartModal" height="200"></canvas>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Produto</th>
+                                <th>Estoque Atual</th>
+                                <th>Ponto Pedido</th>
+                                <th>Estoque Segurança</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reorderTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <div class="grid-2" style="margin-top:20px;">
+        <!-- LANDED COST -->
+        <div id="landed" class="section">
             <div class="panel">
                 <div class="panel-header">
                     <div>
-                        <div class="panel-title">📋 Embarques Recentes</div>
-                        <div class="panel-subtitle">Últimas movimentações na rede</div>
-                    </div>
-                    <button class="btn-secondary" onclick="showSection('shipments', document.querySelectorAll('.nav-item')[1])">Ver todos →</button>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>BL / AWB</th>
-                            <th>Rota</th>
-                            <th>Modal</th>
-                            <th>Status</th>
-                            <th>ETA</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recentShipments"></tbody>
-                </table>
-            </div>
-
-            <div class="panel">
-                <div class="panel-header">
-                    <div>
-                        <div class="panel-title">⚠️ Alertas & Exceções</div>
-                        <div class="panel-subtitle">Eventos que requerem ação</div>
+                        <div class="panel-title">💰 Calculadora de Landed Cost</div>
+                        <div class="panel-subtitle">Custo total do produto no destino</div>
                     </div>
                 </div>
-                <div id="alertsList"></div>
-            </div>
-        </div>
-
-        <div class="panel" style="margin-top:20px;">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">🌍 Performance por Corredor Logístico</div>
-                    <div class="panel-subtitle">Principais rotas internacionais</div>
-                </div>
-            </div>
-            <canvas id="chartCorridor" height="80"></canvas>
-        </div>
-    </div>
-
-    <!-- SHIPMENTS -->
-    <div id="shipments" class="section">
-        <div class="panel">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">➕ Novo Embarque</div>
-                    <div class="panel-subtitle">Registre uma nova operação na rede global</div>
-                </div>
-            </div>
-            <form id="shipmentForm" onsubmit="createShipment(event)">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Nº BL / AWB</label>
-                        <input type="text" class="form-control" id="blNumber" placeholder="Ex: MAEU1234567" required>
+                        <label>Preço FOB (USD)</label>
+                        <input type="number" class="form-control" id="lcFOB" value="10000" oninput="calcLandedCost()">
                     </div>
                     <div class="form-group">
-                        <label>Cliente / Shipper</label>
-                        <input type="text" class="form-control" id="customer" placeholder="Ex: Apple Inc." required>
+                        <label>Frete Internacional (USD)</label>
+                        <input type="number" class="form-control" id="lcFreight" value="2500" oninput="calcLandedCost()">
                     </div>
                     <div class="form-group">
-                        <label>Origem (Porto/Aeroporto)</label>
-                        <select class="form-control" id="origin" required></select>
+                        <label>Seguro (USD)</label>
+                        <input type="number" class="form-control" id="lcInsurance" value="150" oninput="calcLandedCost()">
                     </div>
                     <div class="form-group">
-                        <label>Destino (Porto/Aeroporto)</label>
-                        <select class="form-control" id="destination" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Modal de Transporte</label>
-                        <select class="form-control" id="mode" required>
-                            <option value="sea">🚢 Marítimo (FCL/LCL)</option>
-                            <option value="air">✈️ Aéreo</option>
-                            <option value="road">🚛 Rodoviário</option>
-                            <option value="rail">🚆 Ferroviário</option>
+                        <label>NCM / HS Code</label>
+                        <select class="form-control" id="lcNCM" onchange="calcLandedCost()">
+                            <option value="8471.30.12">8471.30.12 - Notebooks (II: 0%, IPI: 8%)</option>
+                            <option value="9401.30.00">9401.30.00 - Cadeiras (II: 18%, IPI: 10%)</option>
+                            <option value="8528.52.00">8528.52.00 - Monitores (II: 14%, IPI: 10%)</option>
+                            <option value="8471.60.53">8471.60.53 - Teclados (II: 12%, IPI: 15%)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Incoterm</label>
-                        <select class="form-control" id="incoterm" required>
-                            <option value="EXW">EXW - Ex Works</option>
-                            <option value="FOB" selected>FOB - Free On Board</option>
-                            <option value="CIF">CIF - Cost, Insurance & Freight</option>
-                            <option value="DDP">DDP - Delivered Duty Paid</option>
-                            <option value="DAP">DAP - Delivered At Place</option>
-                        </select>
+                        <label>Taxa Cambial (USD → BRL)</label>
+                        <input type="number" class="form-control" id="lcExchange" value="5.12" step="0.01" oninput="calcLandedCost()">
                     </div>
                     <div class="form-group">
-                        <label>Operador Logístico</label>
-                        <select class="form-control" id="carrier" required></select>
+                        <label>Taxa de Armazenagem (%)</label>
+                        <input type="number" class="form-control" id="lcStorage" value="1.5" step="0.1" oninput="calcLandedCost()">
                     </div>
                     <div class="form-group">
-                        <label>Peso (kg)</label>
-                        <input type="number" class="form-control" id="weight" step="0.01" required>
+                        <label>Despesas Aduaneiras (USD)</label>
+                        <input type="number" class="form-control" id="lcCustoms" value="450" oninput="calcLandedCost()">
                     </div>
                     <div class="form-group">
-                        <label>Valor CIF (USD)</label>
-                        <input type="number" class="form-control" id="valueUSD" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select class="form-control" id="status" required>
-                            <option value="pending">📋 Aguardando Coleta</option>
-                            <option value="transit">🚢 Em Trânsito</option>
-                            <option value="customs">🛃 Em Despacho Aduaneiro</option>
-                            <option value="delivered">✅ Entregue</option>
-                            <option value="delayed">⚠️ Atrasado</option>
-                        </select>
-                    </div>
-                    <div class="form-group full" style="margin-top:16px;">
-                        <button type="submit" class="btn-primary">🚀 Registrar Embarque</button>
-                        <button type="button" class="btn-secondary" onclick="document.getElementById('shipmentForm').reset()">Limpar</button>
+                        <label>ICMS Estadual (%)</label>
+                        <input type="number" class="form-control" id="lcICMS" value="18" step="0.1" oninput="calcLandedCost()">
                     </div>
                 </div>
-            </form>
-        </div>
+                <div class="calc-result" id="lcResult"></div>
+            </div>
 
-        <div class="panel">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">📦 Embarques Cadastrados</div>
-                    <div class="panel-subtitle">Total: <span id="shipmentsCount">0</span> operações</div>
-                </div>
-            </div>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>BL / AWB</th>
-                            <th>Cliente</th>
-                            <th>Rota</th>
-                            <th>Modal</th>
-                            <th>Incoterm</th>
-                            <th>Operador</th>
-                            <th>Valor (USD)</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="shipmentsTable"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- TRACKING -->
-    <div id="tracking" class="section">
-        <div class="panel">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">🛰️ Rastreamento de Embarque</div>
-                    <div class="panel-subtitle">Insira o BL, AWB ou Container</div>
-                </div>
-            </div>
-            <div style="display:flex;gap:12px;max-width:600px;">
-                <input type="text" class="form-control" id="trackInput" placeholder="Ex: MAEU1234567" style="flex:1;">
-                <button class="btn-primary" onclick="trackShipment()">Rastrear</button>
-            </div>
-        </div>
-        <div id="trackResult"></div>
-    </div>
-
-    <!-- WAREHOUSES -->
-    <div id="warehouses" class="section">
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <span class="kpi-icon">🏭</span>
-                <div class="kpi-label">Armazéns Ativos</div>
-                <div class="kpi-value" id="whCount">0</div>
-                <div class="kpi-change">Em 14 países</div>
-            </div>
-            <div class="kpi-card success">
-                <span class="kpi-icon">📊</span>
-                <div class="kpi-label">Capacidade Total</div>
-                <div class="kpi-value" id="whCapacity">0 m²</div>
-                <div class="kpi-change up">Ocupação média: 74%</div>
-            </div>
-            <div class="kpi-card warning">
-                <span class="kpi-icon">📦</span>
-                <div class="kpi-label">SKUs em Estoque</div>
-                <div class="kpi-value" id="whSKUs">0</div>
-                <div class="kpi-change">Inventário global</div>
-            </div>
-        </div>
-        <div class="panel">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">🌐 Rede de Armazéns Globais</div>
-                    <div class="panel-subtitle">Distribuição estratégica por região</div>
-                </div>
-            </div>
-            <div id="warehousesList"></div>
-        </div>
-    </div>
-
-    <!-- CARRIERS -->
-    <div id="carriers" class="section">
-        <div class="panel">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">🚢 Operadores Logísticos Globais</div>
-                    <div class="panel-subtitle">Parceiros de transporte multimodal</div>
-                </div>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Operador</th>
-                        <th>HQ</th>
-                        <th>Modal</th>
-                        <th>Frota</th>
-                        <th>Cobertura</th>
-                        <th>Performance</th>
-                    </tr>
-                </thead>
-                <tbody id="carriersTable"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- SUPPLIERS -->
-    <div id="suppliers" class="section">
-        <div class="panel">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">🏢 Fornecedores Globais</div>
-                    <div class="panel-subtitle">Base de suppliers estratégicos</div>
-                </div>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Empresa</th>
-                        <th>País</th>
-                        <th>Setor</th>
-                        <th>Tier</th>
-                        <th>Lead Time</th>
-                        <th>Rating</th>
-                    </tr>
-                </thead>
-                <tbody id="suppliersTable"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- REPORTS -->
-    <div id="reports" class="section">
-        <div class="grid-3">
             <div class="panel">
-                <div class="panel-title">📈 Volume Movimentado (TEU)</div>
-                <canvas id="reportTEU"></canvas>
-            </div>
-            <div class="panel">
-                <div class="panel-title">💰 Receita por Modal</div>
-                <canvas id="reportRevenue"></canvas>
-            </div>
-            <div class="panel">
-                <div class="panel-title">🎯 OTIF por Operador</div>
-                <canvas id="reportOTIF"></canvas>
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🔄 Simulador de Incoterms</div>
+                        <div class="panel-subtitle">Compare o custo final em cada modalidade</div>
+                    </div>
+                </div>
+                <div id="incotermComparison"></div>
             </div>
         </div>
-        <div class="panel" style="margin-top:20px;">
-            <div class="panel-title" style="margin-bottom:16px;">📊 Análise de Custos Logísticos</div>
-            <canvas id="reportCosts" height="80"></canvas>
-        </div>
-    </div>
 
-    <!-- EXCEPTIONS -->
-    <div id="exceptions" class="section">
-        <div class="panel">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">⚠️ Central de Gestão de Exceções</div>
-                    <div class="panel-subtitle">Desvios operacionais que exigem intervenção</div>
+        <!-- COMEX DOCS -->
+        <div id="docs" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📄 Central de Documentos de Comex</div>
+                        <div class="panel-subtitle">Geração automática e validação</div>
+                    </div>
+                </div>
+                <div id="docsList"></div>
+            </div>
+        </div>
+
+        <!-- AI -->
+        <div id="ai" class="section">
+            <div class="grid-3">
+                <div class="kpi-card purple">
+                    <div class="kpi-header"><div class="kpi-label">Modelos Ativos</div><div class="kpi-icon">🧠</div></div>
+                    <div class="kpi-value">7</div>
+                    <div class="kpi-change">ML/DL em produção</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-header"><div class="kpi-label">Acurácia ETA</div><div class="kpi-icon">🎯</div></div>
+                    <div class="kpi-value">94.2%</div>
+                    <div class="kpi-change up">+2.1pp vs baseline</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-header"><div class="kpi-label">Anomalias Detectadas</div><div class="kpi-icon">🔍</div></div>
+                    <div class="kpi-value" id="anomaliesCount">0</div>
+                    <div class="kpi-change">Últimos 30 dias</div>
                 </div>
             </div>
-            <div id="exceptionsList"></div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🎯 ETA Preditivo (IA)</div>
+                        <div class="panel-subtitle">Previsão baseada em clima, tráfego e histórico</div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Embarque</th>
+                                <th>ETA Original</th>
+                                <th>ETA Preditivo</th>
+                                <th>Confiança</th>
+                                <th>Fatores de Risco</th>
+                            </tr>
+                        </thead>
+                        <tbody id="etaPrediction"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🔮 Simulação What-If</div>
+                        <div class="panel-subtitle">Analise cenários de disrupção</div>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <div class="form-group" style="margin-bottom:12px;">
+                            <label>Cenário de Disrupção</label>
+                            <select class="form-control" id="whatifScenario" onchange="runWhatIf()">
+                                <option value="none">Nenhum - operação normal</option>
+                                <option value="suez">Bloqueio Canal de Suez (+7 dias)</option>
+                                <option value="panama">Restrição Canal do Panamá (+5 dias)</option>
+                                <option value="strike">Greve portuária (+10 dias)</option>
+                                <option value="weather">Evento climático extremo (+14 dias)</option>
+                                <option value="sanction">Sanção comercial (rota alternativa)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px;">
+                            <label>Modal Alternativo</label>
+                            <select class="form-control" id="whatifModal" onchange="runWhatIf()">
+                                <option value="current">Manter modal atual</option>
+                                <option value="sea">Migrar para Marítimo</option>
+                                <option value="air">Migrar para Aéreo (urgente)</option>
+                                <option value="rail">Migrar para Ferroviário</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="whatifResult"></div>
+                </div>
+            </div>
         </div>
+
+        <!-- ESG -->
+        <div id="esg" class="section">
+            <div class="kpi-grid">
+                <div class="kpi-card success">
+                    <div class="kpi-header"><div class="kpi-label">CO₂ Total Emitido</div><div class="kpi-icon">🌱</div></div>
+                    <div class="kpi-value" id="esgTotal">0 t</div>
+                    <div class="kpi-change down">▼ 8% YoY</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header"><div class="kpi-label">CO₂ / TEU</div><div class="kpi-icon">📊</div></div>
+                    <div class="kpi-value" id="esgPerTEU">0 kg</div>
+                    <div class="kpi-change up">Meta: < 50 kg</div>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="kpi-header"><div class="kpi-label">Score ESG</div><div class="kpi-icon">⭐</div></div>
+                    <div class="kpi-value">A-</div>
+                    <div class="kpi-change up">Rating MSCI</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-header"><div class="kpi-label">Créditos Compensados</div><div class="kpi-icon">🌳</div></div>
+                    <div class="kpi-value">340 t</div>
+                    <div class="kpi-change">Reflorestamento</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🌱 Calculadora de Pegada de Carbono</div>
+                        <div class="panel-subtitle">Compare modais para sua operação</div>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Peso da Carga (toneladas)</label>
+                        <input type="number" class="form-control" id="esgWeight" value="15" step="0.1" oninput="calcCO2()">
+                    </div>
+                    <div class="form-group">
+                        <label>Distância (km)</label>
+                        <input type="number" class="form-control" id="esgDistance" value="12000" oninput="calcCO2()">
+                    </div>
+                </div>
+                <div class="co2-comparison" id="co2Comparison"></div>
+                <div class="calc-result" id="co2Recommendation"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📊 Emissões por Modal</div>
+                        <div class="panel-subtitle">Distribuição da pegada de carbono</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartESG"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- RISK -->
+        <div id="risk" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🛡️ Monitor de Riscos Geopolíticos</div>
+                        <div class="panel-subtitle">Rotas críticas e eventos globais</div>
+                    </div>
+                </div>
+                <div id="riskMonitor"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🌍 Score de Risco por Região</div>
+                        <div class="panel-subtitle">Análise de compliance e sanções</div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Região</th>
+                                <th>Score de Risco</th>
+                                <th>Sanções</th>
+                                <th>Estabilidade</th>
+                                <th>Corrupção (CPI)</th>
+                                <th>Recomendação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riskTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🔀 Estratégia Dual Sourcing</div>
+                        <div class="panel-subtitle">Redundância de fornecedores críticos</div>
+                    </div>
+                </div>
+                <div id="dualSourcing"></div>
+            </div>
+        </div>
+
+        <!-- CARRIERS -->
+        <div id="carriers" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🚢 Operadores Logísticos Globais</div>
+                        <div class="panel-subtitle">Parceiros de transporte multimodal</div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Operador</th>
+                                <th>HQ</th>
+                                <th>Modal</th>
+                                <th>Frota</th>
+                                <th>Cobertura</th>
+                                <th>OTIF</th>
+                                <th>CO₂ Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carriersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUPPLIERS -->
+        <div id="suppliers" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🏢 Fornecedores Globais</div>
+                        <div class="panel-subtitle">Base estratégica de suppliers</div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Região</th>
+                                <th>Setor</th>
+                                <th>Tier</th>
+                                <th>Lead Time</th>
+                                <th>ESG</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PORTAL MULTIUSUÁRIO -->
+        <div id="portal" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">👥 Portal Colaborativo Multiusuário</div>
+                        <div class="panel-subtitle">Ecossistema integrado com clientes, fornecedores e operadores</div>
+                    </div>
+                </div>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab(this, 'tab-users')">Usuários & Papéis</div>
+                    <div class="tab" onclick="switchTab(this, 'tab-workflow')">Workflow de Aprovações</div>
+                    <div class="tab" onclick="switchTab(this, 'tab-notifications')">Notificações</div>
+                    <div class="tab" onclick="switchTab(this, 'tab-api')">Integrações API</div>
+                </div>
+
+                <div id="tab-users" class="tab-content active">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Email</th>
+                                    <th>Papel</th>
+                                    <th>Empresa</th>
+                                    <th>Último Acesso</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-workflow" class="tab-content">
+                    <div id="workflowList"></div>
+                </div>
+
+                <div id="tab-notifications" class="tab-content">
+                    <div class="grid-3">
+                        <div class="panel" style="margin-bottom:0;">
+                            <div class="panel-title">📧 Email</div>
+                            <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">SMTP corporativo configurado</p>
+                            <div style="margin-top:12px;"><span class="badge badge-delivered"><span class="badge-dot"></span>Ativo</span></div>
+                        </div>
+                        <div class="panel" style="margin-bottom:0;">
+                            <div class="panel-title">💬 WhatsApp Business</div>
+                            <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">API oficial integrada</p>
+                            <div style="margin-top:12px;"><span class="badge badge-delivered"><span class="badge-dot"></span>Ativo</span></div>
+                        </div>
+                        <div class="panel" style="margin-bottom:0;">
+                            <div class="panel-title">📱 SMS</div>
+                            <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Twilio configurado</p>
+                            <div style="margin-top:12px;"><span class="badge badge-delivered"><span class="badge-dot"></span>Ativo</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-api" class="tab-content">
+                    <div class="grid-2">
+                        <div class="panel" style="margin-bottom:0;">
+                            <div class="panel-title">🔌 Integrações Ativas</div>
+                            <div style="margin-top:12px;">
+                                <div class="doc-item"><div class="doc-info"><span class="doc-icon">🏢</span><div><div class="doc-name">SAP S/4HANA</div><div class="doc-meta">ERP Principal • REST API</div></div></div><span class="badge badge-delivered">Conectado</span></div>
+                                <div class="doc-item"><div class="doc-info"><span class="doc-icon">💼</span><div><div class="doc-name">Oracle SCM Cloud</div><div class="doc-meta">Supply Chain • SOAP</div></div></div><span class="badge badge-delivered">Conectado</span></div>
+                                <div class="doc-item"><div class="doc-info"><span class="doc-icon">🇧🇷</span><div><div class="doc-name">Siscomex / Portal Único</div><div class="doc-meta">Comex Gov • EDI</div></div></div><span class="badge badge-delivered">Conectado</span></div>
+                                <div class="doc-item"><div class="doc-info"><span class="doc-icon">📊</span><div><div class="doc-name">Power BI</div><div class="doc-meta">Analytics • OData</div></div></div><span class="badge badge-delivered">Conectado</span></div>
+                            </div>
+                        </div>
+                        <div class="panel" style="margin-bottom:0;">
+                            <div class="panel-title">📡 Webhooks</div>
+                            <div style="margin-top:12px;font-family:monospace;font-size:12px;background:var(--bg-900);padding:16px;border-radius:8px;">
+                                <div style="margin-bottom:8px;">POST /api/v1/shipments/create</div>
+                                <div style="margin-bottom:8px;">POST /api/v1/shipments/{id}/status</div>
+                                <div style="margin-bottom:8px;">POST /api/v1/tracking/update</div>
+                                <div style="margin-bottom:8px;">POST /api/v1/exceptions/alert</div>
+                                <div>POST /api/v1/inventory/sync</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div id="reports" class="section">
+            <div class="grid-3">
+                <div class="panel">
+                    <div class="panel-title" style="margin-bottom:16px;">📈 Volume Mensal (TEU)</div>
+                    <div class="chart-container"><canvas id="reportTEU"></canvas></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title" style="margin-bottom:16px;">💰 Receita por Modal</div>
+                    <div class="chart-container"><canvas id="reportRevenue"></canvas></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title" style="margin-bottom:16px;">🎯 OTIF por Transportadora</div>
+                    <div class="chart-container"><canvas id="reportOTIF"></canvas></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-top:20px;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🏆 Top Vendedores (Histórico)</div>
+                        <div class="panel-subtitle">Baseline operacional R$ 182.853,22 • Bônus R$ 54.855,96</div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Posição</th>
+                                <th>Vendedor</th>
+                                <th>Vendas</th>
+                                <th>Bônus</th>
+                                <th>Participação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topVendors"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">📊 Análise de Custos Logísticos (12 meses)</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="reportCosts"></canvas></div>
+            </div>
+        </div>
+
+        <!-- EXCEPTIONS -->
+        <div id="exceptions" class="section">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">🚨 Central de Gestão de Exceções</div>
+                        <div class="panel-subtitle">Desvios operacionais que exigem intervenção</div>
+                    </div>
+                </div>
+                <div id="exceptionsList"></div>
+            </div>
+        </div>
+
     </div>
 </div>
 
+<!-- MODAL -->
 <div class="modal-overlay" id="modal">
     <div class="modal">
         <div class="modal-header">
-            <h3 id="modalTitle">Detalhes</h3>
+            <div class="modal-title" id="modalTitle">Detalhes</div>
             <button class="close-btn" onclick="closeModal()">✕</button>
         </div>
         <div id="modalBody"></div>
@@ -920,129 +1858,220 @@
 <script>
 // =============== DADOS GLOBAIS ===============
 const GLOBAL_DATA = {
+    customers: [
+        'TechCorp Global', 'Nexus Electronics', 'Pacific Trading Co',
+        'Meridian Industries', 'Quantum Solutions', 'Vertex Manufacturing',
+        'Apex Components', 'Solar Dynamics', 'Cryo Systems'
+    ],
+    products: [
+        'Notebook i5', 'Cadeira Gamer', 'Monitor 24', 'Impressora',
+        'SSD 1TB', 'Mesa Escritório', 'Teclado Mecânico', 'Headset',
+        'Mouse Gamer', 'Webcam Full HD'
+    ],
     hubs: [
-        { code: 'RTM', name: 'Rotterdam', country: '🇳🇱', x: 48, y: 28, type: 'Porto Marítimo', teu: '14.5M TEU/ano' },
-        { code: 'SIN', name: 'Singapura', country: '🇸🇬', x: 78, y: 58, type: 'Hub Marítimo', teu: '37.2M TEU/ano' },
-        { code: 'SHA', name: 'Shanghai', country: '🇨🇳', x: 82, y: 38, type: 'Porto Marítimo', teu: '47M TEU/ano' },
-        { code: 'LAX', name: 'Los Angeles', country: '🇺🇸', x: 14, y: 38, type: 'Porto Marítimo', teu: '9.9M TEU/ano' },
-        { code: 'MEM', name: 'Memphis', country: '🇺🇸', x: 22, y: 40, type: 'Hub Aéreo (FedEx)', teu: 'SuperHub' },
-        { code: 'DXB', name: 'Dubai', country: '🇦🇪', x: 62, y: 42, type: 'Hub Multimodal', teu: 'Jebel Ali' },
-        { code: 'SSZ', name: 'Santos', country: '🇧🇷', x: 30, y: 70, type: 'Porto Marítimo', teu: '4.1M TEU/ano' },
-        { code: 'FRA', name: 'Frankfurt', country: '🇩🇪', x: 50, y: 26, type: 'Hub Aéreo', teu: 'Cargo Center' },
-        { code: 'NRT', name: 'Tokyo', country: '🇯🇵', x: 88, y: 35, type: 'Porto/Aéreo', teu: 'Narita+Yokohama' },
-        { code: 'GRU', name: 'São Paulo', country: '🇧🇷', x: 31, y: 68, type: 'Aeroporto Cargo', teu: 'Viracopos+GRU' }
+        { code: 'ALPHA', name: 'Hub Alpha', region: '🌏 Ásia-Pacífico', type: 'Porto Marítimo', teu: '47M TEU/ano', x: 82, y: 38, country: '🇨🇳' },
+        { code: 'BETA', name: 'Hub Beta', region: '🌍 Europa', type: 'Hub Multimodal', teu: '14.5M TEU/ano', x: 50, y: 28, country: '🇳🇱' },
+        { code: 'GAMMA', name: 'Hub Gamma', region: '🌎 América do Norte', type: 'Porto Marítimo', teu: '9.9M TEU/ano', x: 14, y: 38, country: '🇺🇸' },
+        { code: 'DELTA', name: 'Hub Delta', region: '🌎 América do Sul', type: 'Porto Marítimo', teu: '4.1M TEU/ano', x: 30, y: 70, country: '🇧🇷' },
+        { code: 'EPSILON', name: 'Hub Epsilon', region: '🌍 Oriente Médio', type: 'Hub Multimodal', teu: 'Jebel Ali', x: 62, y: 42, country: '🇦🇪' },
+        { code: 'ZETA', name: 'Hub Zeta', region: '🌏 Sudeste Asiático', type: 'Hub Marítimo', teu: '37.2M TEU/ano', x: 78, y: 58, country: '🇸🇬' }
     ],
     carriers: [
-        { name: 'Maersk', hq: '🇩🇰 Copenhagen', mode: 'Marítimo', fleet: '730+ navios', coverage: '130 países', otif: 94 },
-        { name: 'MSC', hq: '🇨🇭 Geneva', mode: 'Marítimo', fleet: '800+ navios', coverage: '155 países', otif: 92 },
-        { name: 'DHL Global Forwarding', hq: '🇩🇪 Bonn', mode: 'Multimodal', fleet: 'Global', coverage: '220+ países', otif: 96 },
-        { name: 'Kuehne+Nagel', hq: '🇨🇭 Schindellegi', mode: 'Freight Forwarding', fleet: 'Global', coverage: '100 países', otif: 95 },
-        { name: 'DB Schenker', hq: '🇩🇪 Essen', mode: 'Multimodal', fleet: 'Global', coverage: '140 países', otif: 93 },
-        { name: 'FedEx Express', hq: '🇺🇸 Memphis', mode: 'Aéreo', fleet: '680+ aeronaves', coverage: '220+ países', otif: 97 },
-        { name: 'CMA CGM', hq: '🇫🇷 Marseille', mode: 'Marítimo', fleet: '600+ navios', coverage: '420 portos', otif: 91 },
-        { name: 'UPS Supply Chain', hq: '🇺🇸 Atlanta', mode: 'Multimodal', fleet: '590+ aeronaves', coverage: '200+ países', otif: 96 }
+        { name: 'Pacífico Shipping', hq: '🌏 Hub Alpha', mode: 'Marítimo', fleet: '450+ navios', coverage: '120 países', otif: 94, co2: 12 },
+        { name: 'AeroFreight Intl', hq: '🌎 Hub Gamma', mode: 'Aéreo', fleet: '280+ aeronaves', coverage: '180 países', otif: 97, co2: 85 },
+        { name: 'MegaCargo Express', hq: '🌎 Hub Gamma', mode: 'Rodoviário', fleet: '2500+ caminhões', coverage: '45 países', otif: 92, co2: 45 },
+        { name: 'TransContinental Rail', hq: '🌍 Hub Beta', mode: 'Ferroviário', fleet: '800+ vagões', coverage: '28 países', otif: 95, co2: 8 },
+        { name: 'Nexus Logistics', hq: '🌏 Hub Zeta', mode: 'Multimodal', fleet: 'Global', coverage: '150 países', otif: 96, co2: 22 },
+        { name: 'Global Freight Sol.', hq: '🌍 Hub Beta', mode: 'Freight Forwarding', fleet: 'Global', coverage: '95 países', otif: 93, co2: 28 }
     ],
     suppliers: [
-        { name: 'Foxconn', country: '🇨🇳 China', sector: 'Eletrônicos', tier: 'Tier 1', lead: '28d', rating: 4.7 },
-        { name: 'TSMC', country: '🇹🇼 Taiwan', sector: 'Semicondutores', tier: 'Tier 1', lead: '90d', rating: 4.9 },
-        { name: 'Samsung SDI', country: '🇰🇷 Coreia do Sul', sector: 'Baterias', tier: 'Tier 1', lead: '45d', rating: 4.8 },
-        { name: 'Bosch', country: '🇩🇪 Alemanha', sector: 'Autopeças', tier: 'Tier 1', lead: '21d', rating: 4.6 },
-        { name: 'Toyota Tsusho', country: '🇯🇵 Japão', sector: 'Automotivo', tier: 'Tier 1', lead: '35d', rating: 4.8 },
-        { name: 'Flex Ltd', country: '🇸🇬 Singapura', sector: 'EMS', tier: 'Tier 2', lead: '24d', rating: 4.5 },
-        { name: 'Pegatron', country: '🇹🇼 Taiwan', sector: 'Eletrônicos', tier: 'Tier 1', lead: '32d', rating: 4.4 }
+        { name: 'Precision Components', region: '🌏 Ásia', sector: 'Eletrônicos', tier: 'Tier 1', lead: '28d', esg: 'A', rating: 4.7 },
+        { name: 'Advanced Materials', region: '🌍 Europa', sector: 'Químicos', tier: 'Tier 1', lead: '21d', esg: 'A+', rating: 4.8 },
+        { name: 'Global Parts Mfg', region: '🌎 América N.', sector: 'Autopeças', tier: 'Tier 1', lead: '35d', esg: 'B+', rating: 4.6 },
+        { name: 'TechSource Intl', region: '🌏 Ásia', sector: 'Semicondutores', tier: 'Tier 1', lead: '90d', esg: 'A', rating: 4.9 },
+        { name: 'Southern Industries', region: '🌎 América S.', sector: 'Têxtil', tier: 'Tier 2', lead: '24d', esg: 'B', rating: 4.5 }
     ],
     warehouses: [
-        { city: 'Rotterdam', country: '🇳🇱', code: 'RTM-DC01', area: 85000, capacity: 82, skus: 42500 },
-        { city: 'Singapura', country: '🇸🇬', code: 'SIN-DC01', area: 65000, capacity: 91, skus: 38200 },
-        { city: 'Cajamar (SP)', country: '🇧🇷', code: 'GRU-DC01', area: 120000, capacity: 76, skus: 68500 },
-        { city: 'Memphis', country: '🇺🇸', code: 'MEM-HUB', area: 95000, capacity: 68, skus: 52100 },
-        { city: 'Frankfurt', country: '🇩🇪', code: 'FRA-DC01', area: 48000, capacity: 71, skus: 28400 },
-        { city: 'Dubai', country: '🇦🇪', code: 'DXB-DC01', area: 72000, capacity: 88, skus: 41200 },
-        { city: 'Shanghai', country: '🇨🇳', code: 'SHA-DC01', area: 155000, capacity: 79, skus: 95800 },
-        { city: 'Extrema (MG)', country: '🇧🇷', code: 'CNF-DC01', area: 88000, capacity: 65, skus: 47600 }
+        { city: 'Hub Beta DC01', region: '🌍', code: 'BETA-DC01', area: 85000, capacity: 82, skus: 42500 },
+        { city: 'Hub Alpha DC01', region: '🌏', code: 'ALPHA-DC01', area: 155000, capacity: 79, skus: 95800 },
+        { city: 'Hub Gamma DC01', region: '🌎', code: 'GAMMA-DC01', area: 120000, capacity: 76, skus: 68500 },
+        { city: 'Hub Delta DC01', region: '🌎', code: 'DELTA-DC01', area: 88000, capacity: 65, skus: 47600 },
+        { city: 'Hub Epsilon DC01', region: '🌍', code: 'EPSILON-DC01', area: 45000, capacity: 71, skus: 28400 },
+        { city: 'Hub Zeta DC01', region: '🌏', code: 'ZETA-DC01', area: 65000, capacity: 91, skus: 38200 }
     ],
-    incoterms: {
-        'EXW': { name: 'Ex Works', risk: 'Comprador' },
-        'FOB': { name: 'Free On Board', risk: 'Dividido' },
-        'CIF': { name: 'Cost, Insurance & Freight', risk: 'Vendedor até destino' },
-        'DDP': { name: 'Delivered Duty Paid', risk: 'Vendedor total' },
-        'DAP': { name: 'Delivered At Place', risk: 'Vendedor até local' }
-    }
+    users: [
+        { name: 'Admin SCM', email: 'admin@global-scm.com', role: 'Administrador', company: 'Global SCM', lastAccess: '2 min', status: 'active' },
+        { name: 'Maria Santos', email: 'm.santos@techcorp.com', role: 'Gerente Operações', company: 'TechCorp Global', lastAccess: '1h', status: 'active' },
+        { name: 'João Pereira', email: 'j.pereira@nexus-log.com', role: 'Operador Logístico', company: 'Nexus Logistics', lastAccess: '3h', status: 'active' },
+        { name: 'Chen Wei', email: 'c.wei@precision.com', role: 'Fornecedor', company: 'Precision Components', lastAccess: '1 dia', status: 'active' },
+        { name: 'Sarah Johnson', email: 's.johnson@aerofreight.com', role: 'Transportadora', company: 'AeroFreight Intl', lastAccess: '5h', status: 'active' },
+        { name: 'Carlos Mendes', email: 'c.mendes@customs.com', role: 'Despachante', company: 'Customs BR', lastAccess: '2 dias', status: 'pending' }
+    ],
+    ncmRates: {
+        '8471.30.12': { ii: 0, ipi: 8, pis: 1.65, cofins: 7.6, desc: 'Notebooks' },
+        '9401.30.00': { ii: 18, ipi: 10, pis: 1.65, cofins: 7.6, desc: 'Cadeiras' },
+        '8528.52.00': { ii: 14, ipi: 10, pis: 1.65, cofins: 7.6, desc: 'Monitores' },
+        '8471.60.53': { ii: 12, ipi: 15, pis: 1.65, cofins: 7.6, desc: 'Teclados' }
+    },
+    historicalVendors: [
+        { name: 'Giovana', vendas: 54000, bonus: 9780 },
+        { name: 'Carla', vendas: 42270, bonus: 8220 },
+        { name: 'Bruno', vendas: 42000, bonus: 8060 },
+        { name: 'Henrique', vendas: 41000, bonus: 7710 },
+        { name: 'Ana', vendas: 38500, bonus: 6930 },
+        { name: 'Eduarda', vendas: 37000, bonus: 6610 },
+        { name: 'Felipe', vendas: 33500, bonus: 4780 },
+        { name: 'Daniel', vendas: 27600, bonus: 2760 }
+    ]
 };
 
 const INITIAL_SHIPMENTS = [
-    { id: 'SH001', bl: 'MAEU8745123', customer: 'Apple Inc.', origin: 'SHA', destination: 'LAX', mode: 'sea', incoterm: 'FOB', carrier: 'Maersk', weight: 12500, value: 850000, status: 'transit', eta: 18, created: Date.now() - 86400000*5 },
-    { id: 'SH002', bl: 'SIN-100293', customer: 'Samsung Electronics', origin: 'NRT', destination: 'RTM', mode: 'sea', incoterm: 'CIF', carrier: 'MSC', weight: 8200, value: 620000, status: 'transit', eta: 12, created: Date.now() - 86400000*3 },
-    { id: 'SH003', bl: 'AWB-172-9845', customer: 'Dell Technologies', origin: 'MEM', destination: 'GRU', mode: 'air', incoterm: 'DDP', carrier: 'FedEx Express', weight: 450, value: 185000, status: 'customs', eta: 2, created: Date.now() - 86400000*1 },
-    { id: 'SH004', bl: 'HLCU5567234', customer: 'Volkswagen AG', origin: 'FRA', destination: 'SSZ', mode: 'sea', incoterm: 'CIF', carrier: 'Hapag-Lloyd', weight: 22000, value: 1250000, status: 'delayed', eta: 28, created: Date.now() - 86400000*15 },
-    { id: 'SH005', bl: 'AWB-297-4412', customer: 'Pfizer', origin: 'FRA', destination: 'JFK', mode: 'air', incoterm: 'DAP', carrier: 'DHL Global Forwarding', weight: 890, value: 2400000, status: 'transit', eta: 1, created: Date.now() - 86400000*0.5 },
-    { id: 'SH006', bl: 'CMAU4412890', customer: 'Nike', origin: 'SIN', destination: 'LAX', mode: 'sea', incoterm: 'FOB', carrier: 'CMA CGM', weight: 18500, value: 920000, status: 'delivered', eta: 0, created: Date.now() - 86400000*10 }
+    { id: 'SH-2024-001', bl: 'MAEU8745123', customer: 'TechCorp Global', origin: 'ALPHA', destination: 'GAMMA', mode: 'sea', incoterm: 'FOB', carrier: 'Pacífico Shipping', product: 'Notebook i5', weight: 12500, distance: 12400, value: 850000, status: 'transit', eta: 18, created: Date.now() - 86400000*5 },
+    { id: 'SH-2024-002', bl: 'SIN-100293', customer: 'Nexus Electronics', origin: 'ZETA', destination: 'BETA', mode: 'sea', incoterm: 'CIF', carrier: 'Pacífico Shipping', product: 'Monitor 24', weight: 8200, distance: 15200, value: 620000, status: 'transit', eta: 12, created: Date.now() - 86400000*3 },
+    { id: 'SH-2024-003', bl: 'AWB-172-9845', customer: 'Quantum Solutions', origin: 'GAMMA', destination: 'DELTA', mode: 'air', incoterm: 'DDP', carrier: 'AeroFreight Intl', product: 'SSD 1TB', weight: 450, distance: 8500, value: 185000, status: 'customs', eta: 2, created: Date.now() - 86400000*1 },
+    { id: 'SH-2024-004', bl: 'HLCU5567234', customer: 'Meridian Industries', origin: 'BETA', destination: 'DELTA', mode: 'sea', incoterm: 'CIF', carrier: 'Nexus Logistics', product: 'Cadeira Gamer', weight: 22000, distance: 9800, value: 1250000, status: 'delayed', eta: 28, created: Date.now() - 86400000*15 },
+    { id: 'SH-2024-005', bl: 'AWB-297-4412', customer: 'Vertex Manufacturing', origin: 'BETA', destination: 'GAMMA', mode: 'air', incoterm: 'DAP', carrier: 'AeroFreight Intl', product: 'Webcam Full HD', weight: 890, distance: 7200, value: 2400000, status: 'delivered', eta: 0, created: Date.now() - 86400000*10 },
+    { id: 'SH-2024-006', bl: 'CMAU4412890', customer: 'Apex Components', origin: 'ZETA', destination: 'GAMMA', mode: 'sea', incoterm: 'FOB', carrier: 'Pacífico Shipping', product: 'Teclado Mecânico', weight: 18500, distance: 13100, value: 920000, status: 'delivered', eta: 0, created: Date.now() - 86400000*12 }
 ];
 
-let shipments = JSON.parse(localStorage.getItem('scm_shipments')) || INITIAL_SHIPMENTS;
+let shipments = JSON.parse(localStorage.getItem('scm_shipments_v2')) || INITIAL_SHIPMENTS;
 let charts = {};
 
-// =============== NAVEGAÇÃO ===============
+// =============== i18n ===============
+const I18N = {
+    pt: {
+        'tagline': 'Enterprise Edition',
+        'nav.operations': 'Operações', 'nav.dashboard': 'Command Center', 'nav.shipments': 'Embarques',
+        'nav.tracking': 'Rastreamento', 'nav.map': 'Mapa Global',
+        'nav.logistics': 'Logística & Inventário', 'nav.warehouses': 'Armazéns',
+        'nav.wms': 'WMS & Curva ABC', 'nav.landed': 'Landed Cost', 'nav.docs': 'Comex Docs',
+        'nav.intelligence': 'Inteligência', 'nav.ai': 'IA Preditiva', 'nav.esg': 'ESG & CO₂',
+        'nav.risk': 'Risco Geopolítico', 'nav.partners': 'Parceiros',
+        'nav.carriers': 'Transportadoras', 'nav.suppliers': 'Fornecedores', 'nav.portal': 'Portal Multiusuário',
+        'nav.analytics': 'Analytics', 'nav.reports': 'Relatórios', 'nav.exceptions': 'Exceções',
+        'page.dashboard.title': 'Command Center', 'page.dashboard.sub': 'Supply Chain Management › Visão Global',
+        'kpi.active': 'Embarques Ativos', 'kpi.leadtime': 'Lead Time Médio', 'kpi.exceptions': 'Exceções',
+        'search': 'Buscar BL, pedido, container...'
+    },
+    en: {
+        'tagline': 'Enterprise Edition',
+        'nav.operations': 'Operations', 'nav.dashboard': 'Command Center', 'nav.shipments': 'Shipments',
+        'nav.tracking': 'Tracking', 'nav.map': 'Global Map',
+        'nav.logistics': 'Logistics & Inventory', 'nav.warehouses': 'Warehouses',
+        'nav.wms': 'WMS & ABC Curve', 'nav.landed': 'Landed Cost', 'nav.docs': 'Comex Docs',
+        'nav.intelligence': 'Intelligence', 'nav.ai': 'Predictive AI', 'nav.esg': 'ESG & CO₂',
+        'nav.risk': 'Geopolitical Risk', 'nav.partners': 'Partners',
+        'nav.carriers': 'Carriers', 'nav.suppliers': 'Suppliers', 'nav.portal': 'Multi-user Portal',
+        'nav.analytics': 'Analytics', 'nav.reports': 'Reports', 'nav.exceptions': 'Exceptions',
+        'page.dashboard.title': 'Command Center', 'page.dashboard.sub': 'Supply Chain Management › Global Overview',
+        'kpi.active': 'Active Shipments', 'kpi.leadtime': 'Avg Lead Time', 'kpi.exceptions': 'Exceptions',
+        'search': 'Search BL, order, container...'
+    },
+    es: {
+        'tagline': 'Edición Empresarial',
+        'nav.operations': 'Operaciones', 'nav.dashboard': 'Centro de Comando', 'nav.shipments': 'Embarques',
+        'nav.tracking': 'Rastreo', 'nav.map': 'Mapa Global',
+        'nav.logistics': 'Logística & Inventario', 'nav.warehouses': 'Almacenes',
+        'nav.wms': 'WMS & Curva ABC', 'nav.landed': 'Costo Puesto', 'nav.docs': 'Docs Comex',
+        'nav.intelligence': 'Inteligencia', 'nav.ai': 'IA Predictiva', 'nav.esg': 'ESG & CO₂',
+        'nav.risk': 'Riesgo Geopolítico', 'nav.partners': 'Socios',
+        'nav.carriers': 'Transportistas', 'nav.suppliers': 'Proveedores', 'nav.portal': 'Portal Multiusuario',
+        'nav.analytics': 'Analítica', 'nav.reports': 'Reportes', 'nav.exceptions': 'Excepciones',
+        'page.dashboard.title': 'Centro de Comando', 'page.dashboard.sub': 'Supply Chain Management › Visión Global',
+        'kpi.active': 'Embarques Activos', 'kpi.leadtime': 'Lead Time Promedio', 'kpi.exceptions': 'Excepciones',
+        'search': 'Buscar BL, pedido, contenedor...'
+    }
+};
+
+function changeLanguage(lang) {
+    localStorage.setItem('scm_lang', lang);
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[lang][key]) el.textContent = I18N[lang][key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (I18N[lang][key]) el.placeholder = I18N[lang][key];
+    });
+}
+
+// =============== THEME ===============
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('scm_theme', next);
+    // Re-render charts for theme
+    setTimeout(() => {
+        renderCharts();
+        if (document.getElementById('esg').classList.contains('active')) renderESGChart();
+        if (document.getElementById('reports').classList.contains('active')) renderReports();
+    }, 100);
+}
+
+// =============== NAV ===============
 function showSection(id, navItem) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     if (navItem) navItem.classList.add('active');
+    if (window.innerWidth <= 900) toggleSidebar();
 
-    const titles = {
-        dashboard: ['Command Center', 'Supply Chain Management › Visão Global'],
-        shipments: ['Gestão de Embarques', 'Operações › Shipments & Bookings'],
-        tracking: ['Rastreamento Global', 'Operações › Track & Trace'],
-        warehouses: ['Armazéns Globais', 'Operações › Warehouses & DCs'],
-        carriers: ['Operadores Logísticos', 'Parceiros › Carriers'],
-        suppliers: ['Fornecedores Globais', 'Parceiros › Suppliers'],
-        reports: ['Analytics & BI', 'Relatórios › KPIs de Supply Chain'],
-        exceptions: ['Gestão de Exceções', 'Operações › Incidentes & Desvios']
-    };
-    document.getElementById('pageTitle').textContent = titles[id][0];
-    document.getElementById('breadcrumb').textContent = titles[id][1];
+    // Trigger section-specific rendering
+    setTimeout(() => {
+        if (id === 'dashboard') renderDashboard();
+        if (id === 'map') { renderFullMap(); renderHubsList(); }
+        if (id === 'landed') { calcLandedCost(); renderIncotermComparison(); }
+        if (id === 'esg') { calcCO2(); renderESGChart(); }
+        if (id === 'wms') { renderABC(); renderReorder(); }
+        if (id === 'risk') { renderRisk(); renderDualSourcing(); }
+        if (id === 'docs') renderDocs();
+        if (id === 'ai') { renderETAPredictions(); runWhatIf(); }
+        if (id === 'portal') { renderUsers(); renderWorkflow(); }
+        if (id === 'reports') renderReports();
+        if (id === 'exceptions') renderExceptions();
+    }, 50);
+}
 
-    if (id === 'reports') setTimeout(renderReports, 100);
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+}
+
+function switchTab(el, tabId) {
+    const parent = el.parentElement;
+    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const panel = parent.parentElement;
+    panel.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
 }
 
 // =============== DASHBOARD ===============
 function renderDashboard() {
     const active = shipments.filter(s => s.status !== 'delivered').length;
-    const delivered = shipments.filter(s => s.status === 'delivered').length;
     const delayed = shipments.filter(s => s.status === 'delayed').length;
     const otif = shipments.length > 0 ? Math.round(((shipments.length - delayed) / shipments.length) * 100) : 0;
     const avgLead = shipments.length > 0 ? Math.round(shipments.reduce((s, sh) => s + sh.eta, 0) / shipments.length) : 0;
+    const revenue = shipments.reduce((s, sh) => s + sh.value, 0);
+    const totalCO2 = shipments.reduce((s, sh) => s + calcCO2ForShipment(sh), 0);
 
     document.getElementById('kpiActive').textContent = active;
     document.getElementById('kpiOTIF').textContent = otif + '%';
     document.getElementById('kpiLeadTime').textContent = avgLead + ' d';
     document.getElementById('kpiExceptions').textContent = delayed;
+    document.getElementById('kpiRevenue').textContent = formatBRL(revenue);
+    document.getElementById('kpiCO2').textContent = (totalCO2 / 1000).toFixed(1);
+    document.getElementById('exceptionsBadge').textContent = delayed;
 
-    renderMap();
     renderRecentShipments();
-    renderAlerts();
     renderCharts();
+    renderAIInsights();
 }
 
-function renderMap() {
-    const container = document.getElementById('mapHubs');
-    container.innerHTML = '';
-    GLOBAL_DATA.hubs.forEach(hub => {
-        const dot = document.createElement('div');
-        dot.className = 'hub';
-        dot.style.left = hub.x + '%';
-        dot.style.top = hub.y + '%';
-        dot.title = `${hub.country} ${hub.name} - ${hub.type}`;
-
-        const label = document.createElement('div');
-        label.className = 'hub-label';
-        label.style.left = hub.x + '%';
-        label.style.top = hub.y + '%';
-        label.textContent = `${hub.country} ${hub.code}`;
-
-        container.appendChild(dot);
-        container.appendChild(label);
-    });
+function calcCO2ForShipment(s) {
+    const factors = { sea: 0.012, air: 0.602, road: 0.090, rail: 0.024 }; // kg CO2 por kg*km
+    return (s.weight * s.distance * (factors[s.mode] || 0.05)) / 1000; // em kg
 }
 
 function renderRecentShipments() {
@@ -1057,7 +2086,7 @@ function renderRecentShipments() {
         const dest = GLOBAL_DATA.hubs.find(h => h.code === s.destination);
         return `<tr>
             <td style="font-family:monospace;color:var(--accent);font-weight:600;">${s.bl}</td>
-            <td>${orig?.country || ''} ${orig?.name || s.origin} → ${dest?.country || ''} ${dest?.name || s.destination}</td>
+            <td>${orig?.country || ''} ${orig?.name || ''} → ${dest?.country || ''} ${dest?.name || ''}</td>
             <td><span class="mode-badge mode-${s.mode}">${getModeName(s.mode)}</span></td>
             <td>${getStatusBadge(s.status)}</td>
             <td>${s.eta > 0 ? s.eta + 'd' : '✓'}</td>
@@ -1065,61 +2094,39 @@ function renderRecentShipments() {
     }).join('');
 }
 
-function renderAlerts() {
-    const container = document.getElementById('alertsList');
-    const delayed = shipments.filter(s => s.status === 'delayed');
-    const customs = shipments.filter(s => s.status === 'customs');
-
-    let html = '';
-    delayed.forEach(s => {
-        html += `<div style="padding:12px;border-left:3px solid var(--danger);background:rgba(239,68,68,0.08);border-radius:6px;margin-bottom:10px;">
-            <div style="font-weight:600;font-size:13px;">⚠️ Atraso Crítico: ${s.bl}</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${s.customer} • ${s.carrier} • ETA original comprometido</div>
-        </div>`;
-    });
-    customs.forEach(s => {
-        html += `<div style="padding:12px;border-left:3px solid var(--warning);background:rgba(245,158,11,0.08);border-radius:6px;margin-bottom:10px;">
-            <div style="font-weight:600;font-size:13px;">🛃 Em Despacho Aduaneiro: ${s.bl}</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${s.customer} • Aguardando liberação</div>
-        </div>`;
-    });
-    if (!html) html = '<div class="empty-state">✅ Nenhuma exceção ativa no momento</div>';
-    container.innerHTML = html;
-}
-
 function renderCharts() {
-    if (charts.modal) charts.modal.destroy();
-    const modes = { sea: 0, air: 0, road: 0, rail: 0 };
-    shipments.forEach(s => modes[s.mode] = (modes[s.mode] || 0) + s.weight);
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#e5e7eb' : '#111827';
+    const gridColor = isDark ? 'rgba(55, 65, 81, 0.3)' : 'rgba(229, 231, 235, 0.5)';
 
-    charts.modal = new Chart(document.getElementById('chartModal'), {
-        type: 'bar',
+    if (charts.region) charts.region.destroy();
+    charts.region = new Chart(document.getElementById('chartRegion'), {
+        type: 'doughnut',
         data: {
-            labels: ['Marítimo', 'Aéreo', 'Rodoviário', 'Ferroviário'],
+            labels: ['Centro-Oeste (28.2%)', 'Norte (23.1%)', 'Nordeste (17.1%)', 'Sul (14.5%)', 'Sudeste (14.0%)'],
             datasets: [{
-                label: 'Peso (kg)',
-                data: [modes.sea, modes.air, modes.road, modes.rail],
-                backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981', '#a855f7'],
-                borderRadius: 6
+                data: [28.2, 23.1, 17.1, 14.5, 14.0],
+                backgroundColor: ['#00d4ff', '#3b82f6', '#a855f7', '#10b981', '#f59e0b'],
+                borderColor: isDark ? '#0a0e1a' : '#ffffff',
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
-                x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { color: textColor, font: { size: 11 } } }
             }
         }
     });
 
     if (charts.corridor) charts.corridor.destroy();
     const corridors = [
-        { name: 'Asia → North America', teu: 2850 },
-        { name: 'Asia → Europe', teu: 2140 },
-        { name: 'Europe → LATAM', teu: 980 },
-        { name: 'Intra-Asia', teu: 1650 },
-        { name: 'Transatlantic', teu: 720 }
+        { name: 'Ásia → América Norte', teu: 2850 },
+        { name: 'Ásia → Europa', teu: 2140 },
+        { name: 'Europa → LATAM', teu: 980 },
+        { name: 'Intra-Ásia', teu: 1650 },
+        { name: 'Transatlântico', teu: 720 }
     ];
     charts.corridor = new Chart(document.getElementById('chartCorridor'), {
         type: 'bar',
@@ -1128,79 +2135,174 @@ function renderCharts() {
             datasets: [{
                 label: 'TEU (mil)',
                 data: corridors.map(c => c.teu),
-                backgroundColor: '#00d4ff',
+                backgroundColor: ['#00d4ff', '#3b82f6', '#a855f7', '#10b981', '#f59e0b'],
                 borderRadius: 6
             }]
         },
         options: {
-            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
-                y: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+                y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor }, grid: { display: false } }
             }
         }
     });
 }
 
-// =============== UTILIDADES ===============
-function getModeName(m) {
-    return { sea: 'SEA', air: 'AIR', road: 'ROAD', rail: 'RAIL' }[m] || m;
+function renderAIInsights() {
+    const delayed = shipments.filter(s => s.status === 'delayed');
+    const customs = shipments.filter(s => s.status === 'customs');
+    const highValue = shipments.filter(s => s.value > 1000000);
+
+    const insights = [];
+    if (delayed.length > 0) {
+        insights.push({ icon: '🚨', title: 'Risco de Atraso Detectado', body: `${delayed.length} embarque(s) com desvio de ETA. Recomendamos contatar carriers e notificar clientes proativamente.` });
+    }
+    if (customs.length > 0) {
+        insights.push({ icon: '🛃', title: 'Gargalo Aduaneiro', body: `${customs.length} operação(ões) em despacho. Tempo médio atual: 3.2 dias (benchmark: <2 dias).` });
+    }
+    if (highValue.length > 0) {
+        insights.push({ icon: '💎', title: 'Cargas de Alto Valor', body: `${highValue.length} embarque(s) acima de $1M. Sugestão: ativar seguro premium e rastreamento 24/7.` });
+    }
+    insights.push({ icon: '🌱', title: 'Oportunidade ESG', body: 'Migrar 3 embarques aéreos para marítimo reduziria CO₂ em 42 toneladas (-68%).' });
+    insights.push({ icon: '📈', title: 'Previsão de Demanda', body: 'Modelo ARIMA indica aumento de 18% no volume Ásia→LATAM nos próximos 30 dias. Reserve capacidade.' });
+
+    document.getElementById('aiInsights').innerHTML = insights.slice(0, 5).map(i => `
+        <div class="insight-card">
+            <div class="insight-header">${i.icon} ${i.title}</div>
+            <div class="insight-body">${i.body}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('anomaliesCount').textContent = delayed.length + customs.length;
 }
 
-function getStatusBadge(status) {
-    const map = {
-        pending: ['pending', '📋 Aguardando'],
-        transit: ['transit', '🚢 Em Trânsito'],
-        customs: ['customs', '🛃 Alfândega'],
-        delivered: ['delivered', '✅ Entregue'],
-        delayed: ['delayed', '⚠️ Atrasado']
-    };
-    const [cls, label] = map[status] || ['pending', status];
-    return `<span class="badge ${cls}"><span class="badge-dot-sm"></span>${label}</span>`;
+// =============== MAP ===============
+function renderMiniMap() {
+    const container = document.getElementById('mapHubsMini');
+    container.innerHTML = '';
+    GLOBAL_DATA.hubs.forEach(hub => {
+        const dot = document.createElement('div');
+        dot.className = 'hub';
+        dot.style.left = hub.x + '%';
+        dot.style.top = hub.y + '%';
+        dot.title = `${hub.country} ${hub.name}`;
+        container.appendChild(dot);
+    });
 }
 
-function showToast(msg) {
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 3000);
+function renderFullMap() {
+    const hubsContainer = document.getElementById('mapHubsFull');
+    const routesContainer = document.getElementById('mapRoutes');
+    hubsContainer.innerHTML = '';
+    routesContainer.innerHTML = '';
+
+    GLOBAL_DATA.hubs.forEach(hub => {
+        const dot = document.createElement('div');
+        dot.className = 'hub';
+        dot.style.left = hub.x + '%';
+        dot.style.top = hub.y + '%';
+        dot.onclick = () => showHubDetails(hub);
+
+        const label = document.createElement('div');
+        label.className = 'hub-label';
+        label.style.left = hub.x + '%';
+        label.style.top = hub.y + '%';
+        label.textContent = `${hub.country} ${hub.code}`;
+
+        hubsContainer.appendChild(dot);
+        hubsContainer.appendChild(label);
+    });
+
+    // Draw routes between active shipments
+    const active = shipments.filter(s => s.status === 'transit' || s.status === 'delayed');
+    active.forEach(s => {
+        const orig = GLOBAL_DATA.hubs.find(h => h.code === s.origin);
+        const dest = GLOBAL_DATA.hubs.find(h => h.code === s.destination);
+        if (!orig || !dest) return;
+
+        const x1 = orig.x, y1 = orig.y, x2 = dest.x, y2 = dest.y;
+        const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+        const line = document.createElement('div');
+        line.className = 'route-line';
+        line.style.left = x1 + '%';
+        line.style.top = y1 + '%';
+        line.style.width = length + '%';
+        line.style.transform = `rotate(${angle}deg)`;
+        if (s.status === 'delayed') line.style.background = 'linear-gradient(90deg, #ef4444, #f87171, transparent)';
+        routesContainer.appendChild(line);
+    });
 }
 
-function saveShipments() {
-    localStorage.setItem('scm_shipments', JSON.stringify(shipments));
+function renderHubsList() {
+    const container = document.getElementById('hubsList');
+    container.innerHTML = GLOBAL_DATA.hubs.map(h => `
+        <div class="panel" style="margin-bottom:0;padding:16px;cursor:pointer;" onclick='showHubDetails(${JSON.stringify(h)})'>
+            <div style="font-size:18px;margin-bottom:4px;">${h.country}</div>
+            <div style="font-weight:700;font-size:13px;">${h.name}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${h.region}</div>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px;">
+                <span>${h.type}</span>
+                <span style="color:var(--accent);font-weight:600;">${h.teu}</span>
+            </div>
+        </div>
+    `).join('');
 }
 
-// =============== EMBARQUES ===============
+function showHubDetails(hub) {
+    document.getElementById('modalTitle').textContent = `${hub.country} ${hub.name}`;
+    const hubShipments = shipments.filter(s => s.origin === hub.code || s.destination === hub.code);
+    document.getElementById('modalBody').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div><div style="font-size:11px;color:var(--text-muted);">REGIÃO</div><div>${hub.region}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">TIPO</div><div>${hub.type}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">CAPACIDADE</div><div>${hub.teu}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">EMBARQUES ATIVOS</div><div>${hubShipments.length}</div></div>
+        </div>
+        <h4 style="margin-bottom:12px;">📦 Operações no Hub</h4>
+        ${hubShipments.length === 0 ? '<div class="empty-state">Nenhuma operação ativa</div>' : 
+            hubShipments.map(s => `<div class="doc-item"><div class="doc-info"><span class="doc-icon">📦</span><div><div class="doc-name">${s.bl}</div><div class="doc-meta">${s.customer}</div></div></div>${getStatusBadge(s.status)}</div>`).join('')}
+    `;
+    document.getElementById('modal').classList.add('active');
+}
+
+// =============== SHIPMENTS ===============
 function populateForms() {
+    const customers = document.getElementById('customer');
     const origins = document.getElementById('origin');
     const dests = document.getElementById('destination');
     const carriers = document.getElementById('carrier');
+    const products = document.getElementById('product');
 
+    GLOBAL_DATA.customers.forEach(c => customers.innerHTML += `<option value="${c}">${c}</option>`);
     GLOBAL_DATA.hubs.forEach(h => {
-        origins.innerHTML += `<option value="${h.code}">${h.country} ${h.name} (${h.code})</option>`;
-        dests.innerHTML += `<option value="${h.code}">${h.country} ${h.name} (${h.code})</option>`;
+        origins.innerHTML += `<option value="${h.code}">${h.country} ${h.name}</option>`;
+        dests.innerHTML += `<option value="${h.code}">${h.country} ${h.name}</option>`;
     });
-    GLOBAL_DATA.carriers.forEach(c => {
-        carriers.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-    });
+    GLOBAL_DATA.carriers.forEach(c => carriers.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+    GLOBAL_DATA.products.forEach(p => products.innerHTML += `<option value="${p}">${p}</option>`);
 }
 
 function createShipment(e) {
     e.preventDefault();
     const newS = {
-        id: 'SH' + String(shipments.length + 1).padStart(3, '0'),
+        id: 'SH-' + Date.now().toString().slice(-8),
         bl: document.getElementById('blNumber').value,
         customer: document.getElementById('customer').value,
         origin: document.getElementById('origin').value,
         destination: document.getElementById('destination').value,
         mode: document.getElementById('mode').value,
-        incoterm: document.getElementById('incoterm').value,
         carrier: document.getElementById('carrier').value,
+        product: document.getElementById('product').value,
         weight: parseFloat(document.getElementById('weight').value),
+        distance: parseFloat(document.getElementById('distance').value),
         value: parseFloat(document.getElementById('valueUSD').value),
         status: document.getElementById('status').value,
+        incoterm: document.getElementById('incoterm').value,
         eta: Math.floor(Math.random() * 30) + 3,
         created: Date.now()
     };
@@ -1216,7 +2318,7 @@ function renderShipmentsTable() {
     const tbody = document.getElementById('shipmentsTable');
     document.getElementById('shipmentsCount').textContent = shipments.length;
     if (shipments.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="empty-state">Nenhum embarque cadastrado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhum embarque cadastrado</td></tr>';
         return;
     }
     tbody.innerHTML = shipments.map(s => {
@@ -1225,13 +2327,12 @@ function renderShipmentsTable() {
         return `<tr>
             <td style="font-family:monospace;color:var(--accent);font-weight:600;">${s.bl}</td>
             <td>${s.customer}</td>
-            <td>${orig?.country || ''} ${orig?.name || s.origin} → ${dest?.country || ''} ${dest?.name || s.destination}</td>
+            <td>${orig?.country || ''} → ${dest?.country || ''}</td>
             <td><span class="mode-badge mode-${s.mode}">${getModeName(s.mode)}</span></td>
             <td><strong>${s.incoterm}</strong></td>
-            <td>${s.carrier}</td>
             <td>$${s.value.toLocaleString()}</td>
             <td>${getStatusBadge(s.status)}</td>
-            <td><button class="btn-secondary" onclick="viewShipmentDetails('${s.id}')" style="padding:4px 10px;font-size:11px;">Detalhes</button></td>
+            <td><button class="btn btn-sm btn-secondary" onclick="viewShipmentDetails('${s.id}')">Ver</button></td>
         </tr>`;
     }).join('');
 }
@@ -1241,37 +2342,41 @@ function viewShipmentDetails(id) {
     if (!s) return;
     const orig = GLOBAL_DATA.hubs.find(h => h.code === s.origin);
     const dest = GLOBAL_DATA.hubs.find(h => h.code === s.destination);
+    const co2 = calcCO2ForShipment(s);
 
     document.getElementById('modalTitle').textContent = `📦 ${s.bl}`;
     document.getElementById('modalBody').innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
             <div><div style="font-size:11px;color:var(--text-muted);">CLIENTE</div><div>${s.customer}</div></div>
-            <div><div style="font-size:11px;color:var(--text-muted);">OPERADOR</div><div>${s.carrier}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">PRODUTO</div><div>${s.product}</div></div>
             <div><div style="font-size:11px;color:var(--text-muted);">ORIGEM</div><div>${orig?.country} ${orig?.name}</div></div>
             <div><div style="font-size:11px;color:var(--text-muted);">DESTINO</div><div>${dest?.country} ${dest?.name}</div></div>
             <div><div style="font-size:11px;color:var(--text-muted);">MODAL</div><div>${getModeName(s.mode)}</div></div>
             <div><div style="font-size:11px;color:var(--text-muted);">INCOTERM</div><div>${s.incoterm}</div></div>
             <div><div style="font-size:11px;color:var(--text-muted);">PESO</div><div>${s.weight.toLocaleString()} kg</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">DISTÂNCIA</div><div>${s.distance.toLocaleString()} km</div></div>
             <div><div style="font-size:11px;color:var(--text-muted);">VALOR CIF</div><div>$${s.value.toLocaleString()}</div></div>
             <div><div style="font-size:11px;color:var(--text-muted);">STATUS</div><div>${getStatusBadge(s.status)}</div></div>
             <div><div style="font-size:11px;color:var(--text-muted);">ETA</div><div>${s.eta > 0 ? s.eta + ' dias' : 'Entregue'}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);">🌱 CO₂</div><div>${co2.toFixed(1)} kg</div></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary">🛰️ Rastrear</button>
+            <button class="btn btn-sm btn-secondary">📄 Gerar Docs</button>
+            <button class="btn btn-sm btn-secondary">📧 Notificar</button>
         </div>
     `;
     document.getElementById('modal').classList.add('active');
 }
 
-function closeModal() {
-    document.getElementById('modal').classList.remove('active');
-}
-
-// =============== RASTREAMENTO ===============
+// =============== TRACKING ===============
 function trackShipment() {
     const code = document.getElementById('trackInput').value.trim().toUpperCase();
-    const s = shipments.find(x => x.bl.toUpperCase() === code);
+    const s = shipments.find(x => x.bl.toUpperCase() === code || x.id.toUpperCase() === code);
     const container = document.getElementById('trackResult');
 
     if (!s) {
-        container.innerHTML = `<div class="panel"><div class="empty-state">❌ Embarque "${code}" não encontrado na rede.</div></div>`;
+        container.innerHTML = `<div class="panel"><div class="empty-state"><div class="icon">❌</div><div>Embarque "${code}" não encontrado.</div></div></div>`;
         return;
     }
 
@@ -1282,18 +2387,12 @@ function trackShipment() {
         { done: true, title: '📋 Booking confirmado', meta: 'Reserva emitida junto ao carrier', time: 'D-0' },
         { done: true, title: '🏭 Coleta realizada', meta: `Carga coletada em ${orig?.name}`, time: 'D+2' },
         { done: s.status !== 'pending', title: '🛃 Despacho aduaneiro origem', meta: 'Liberação de exportação concluída', time: 'D+4' },
-        { done: ['transit', 'customs', 'delivered', 'delayed'].includes(s.status), title: `🚢 ${getModeName(s.mode)} em rota`, meta: `${orig?.name} → ${dest?.name}`, time: 'D+5' },
+        { done: ['transit', 'customs', 'delivered', 'delayed'].includes(s.status), title: `${getModeName(s.mode)} em rota`, meta: `${orig?.name} → ${dest?.name}`, time: 'D+5' },
         { done: s.status === 'customs' || s.status === 'delivered', title: '🛃 Chegada no destino', meta: `Em despacho em ${dest?.name}`, time: `D+${s.eta-2}` },
         { done: s.status === 'delivered', title: '✅ Entrega finalizada', meta: 'POD assinado pelo consignatário', time: `D+${s.eta}` }
     ];
 
-    const statusColors = {
-        transit: 'var(--accent)',
-        customs: 'var(--warning)',
-        delivered: 'var(--success)',
-        delayed: 'var(--danger)',
-        pending: 'var(--text-muted)'
-    };
+    const co2 = calcCO2ForShipment(s);
 
     container.innerHTML = `
         <div class="panel">
@@ -1304,16 +2403,16 @@ function trackShipment() {
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:11px;color:var(--text-muted);">STATUS ATUAL</div>
-                    <div style="font-size:18px;font-weight:700;color:${statusColors[s.status]}">${s.status.toUpperCase()}</div>
+                    <div style="font-size:16px;font-weight:700;">${s.status.toUpperCase()}</div>
                 </div>
             </div>
-            <div style="padding:18px;background:var(--bg-900);border-radius:10px;margin-bottom:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+            <div style="padding:18px;background:var(--bg-700);border-radius:10px;margin-bottom:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;">
                 <div><div style="font-size:11px;color:var(--text-muted);">ORIGEM</div><div>${orig?.country} ${orig?.name}</div></div>
-                <div style="font-size:24px;color:var(--accent);">→</div>
                 <div><div style="font-size:11px;color:var(--text-muted);">DESTINO</div><div>${dest?.country} ${dest?.name}</div></div>
                 <div><div style="font-size:11px;color:var(--text-muted);">MODAL</div><div>${getModeName(s.mode)}</div></div>
                 <div><div style="font-size:11px;color:var(--text-muted);">PESO</div><div>${s.weight.toLocaleString()} kg</div></div>
                 <div><div style="font-size:11px;color:var(--text-muted);">VALOR</div><div>$${s.value.toLocaleString()}</div></div>
+                <div><div style="font-size:11px;color:var(--text-muted);">🌱 CO₂</div><div>${co2.toFixed(1)} kg</div></div>
             </div>
             <h4 style="margin-bottom:14px;font-size:13px;">Linha do Tempo</h4>
             <div class="timeline">
@@ -1335,19 +2434,19 @@ function renderWarehouses() {
     document.getElementById('whCount').textContent = GLOBAL_DATA.warehouses.length;
     const totalArea = GLOBAL_DATA.warehouses.reduce((s, w) => s + w.area, 0);
     const totalSKUs = GLOBAL_DATA.warehouses.reduce((s, w) => s + w.skus, 0);
-    document.getElementById('whCapacity').textContent = totalArea.toLocaleString() + ' m²';
-    document.getElementById('whSKUs').textContent = totalSKUs.toLocaleString();
+    document.getElementById('whCapacity').textContent = (totalArea / 1000).toFixed(0) + 'k m²';
+    document.getElementById('whSKUs').textContent = (totalSKUs / 1000).toFixed(0) + 'k';
 
     container.innerHTML = GLOBAL_DATA.warehouses.map(w => `
         <div class="wh-card">
             <div class="wh-header">
                 <div>
-                    <span class="wh-flag">${w.country}</span>
+                    <span class="wh-flag">${w.region}</span>
                     <span class="wh-name">${w.city}</span>
                     <div class="wh-code">${w.code}</div>
                 </div>
-                <span class="badge ${w.capacity > 85 ? 'delayed' : w.capacity > 70 ? 'customs' : 'delivered'}">
-                    <span class="badge-dot-sm"></span>
+                <span class="badge ${w.capacity > 85 ? 'badge-delayed' : w.capacity > 70 ? 'badge-customs' : 'badge-delivered'}">
+                    <span class="badge-dot"></span>
                     ${w.capacity}% ocupado
                 </span>
             </div>
@@ -1355,31 +2454,379 @@ function renderWarehouses() {
                 <div class="capacity-fill ${w.capacity > 85 ? 'high' : ''}" style="width:${w.capacity}%"></div>
             </div>
             <div class="wh-stats">
-                <span>📐 ${w.area.toLocaleString()} m²</span>
-                <span>📦 ${w.skus.toLocaleString()} SKUs</span>
-                <span>🚛 ${(100 - w.capacity)}% livre</span>
+                <span>📐 ${(w.area/1000).toFixed(0)}k m²</span>
+                <span>📦 ${(w.skus/1000).toFixed(1)}k SKUs</span>
+                <span>🚛 ${100 - w.capacity}% livre</span>
             </div>
+        </div>
+    `).join('');
+}
+
+// =============== WMS ===============
+function renderABC() {
+    const abc = [
+        { rank: 'A', sku: 'SSD 1TB', name: 'SSD 1TB NVMe', value: 2450000, pct: 34.2 },
+        { rank: 'A', sku: 'NB-I5-12', name: 'Notebook i5 Pro', value: 1820000, pct: 25.4 },
+        { rank: 'A', sku: 'MON-24-4K', name: 'Monitor 24" 4K', value: 1450000, pct: 20.2 },
+        { rank: 'B', sku: 'CG-PRO', name: 'Cadeira Gamer Pro', value: 620000, pct: 8.6 },
+        { rank: 'B', sku: 'MEC-STD', name: 'Mesa Escritório', value: 380000, pct: 5.3 },
+        { rank: 'C', sku: 'TEC-MEC', name: 'Teclado Mecânico', value: 210000, pct: 2.9 },
+        { rank: 'C', sku: 'WEB-FHD', name: 'Webcam Full HD', value: 180000, pct: 2.5 },
+        { rank: 'C', sku: 'MOU-GAM', name: 'Mouse Gamer', value: 58000, pct: 0.8 }
+    ];
+    document.getElementById('abcList').innerHTML = abc.map(p => `
+        <div class="abc-grid">
+            <div class="abc-rank ${p.rank.toLowerCase()}">${p.rank}</div>
+            <div>
+                <div style="font-weight:600;">${p.name}</div>
+                <div style="font-size:11px;color:var(--text-muted);font-family:monospace;">${p.sku}</div>
+            </div>
+            <div style="text-align:right;font-weight:700;">${formatBRL(p.value)}</div>
+            <div>
+                <div class="abc-bar"><div class="abc-fill" style="width:${p.pct}%"></div></div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${p.pct}%</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderReorder() {
+    const items = [
+        { sku: 'SSD-001', name: 'SSD 1TB NVMe', stock: 120, rop: 150, ss: 50 },
+        { sku: 'NB-005', name: 'Notebook i5 Pro', stock: 45, rop: 80, ss: 30 },
+        { sku: 'MON-024', name: 'Monitor 24" 4K', stock: 280, rop: 100, ss: 40 },
+        { sku: 'CG-PRO', name: 'Cadeira Gamer Pro', stock: 18, rop: 25, ss: 10 },
+        { sku: 'TEC-MEC', name: 'Teclado Mecânico', stock: 420, rop: 200, ss: 80 }
+    ];
+    document.getElementById('reorderTable').innerHTML = items.map(i => {
+        const status = i.stock < i.rop ? 'delayed' : i.stock < i.rop * 1.2 ? 'customs' : 'delivered';
+        const statusLabel = i.stock < i.rop ? '🚨 REPOR AGORA' : i.stock < i.rop * 1.2 ? '⚠️ Próximo' : '✅ OK';
+        return `<tr>
+            <td style="font-family:monospace;">${i.sku}</td>
+            <td>${i.name}</td>
+            <td><strong>${i.stock}</strong></td>
+            <td>${i.rop}</td>
+            <td>${i.ss}</td>
+            <td>${getStatusBadge(status)} ${statusLabel}</td>
+        </tr>`;
+    }).join('');
+}
+
+// =============== LANDED COST ===============
+function calcLandedCost() {
+    const fob = parseFloat(document.getElementById('lcFOB').value) || 0;
+    const freight = parseFloat(document.getElementById('lcFreight').value) || 0;
+    const insurance = parseFloat(document.getElementById('lcInsurance').value) || 0;
+    const customs = parseFloat(document.getElementById('lcCustoms').value) || 0;
+    const storagePct = parseFloat(document.getElementById('lcStorage').value) || 0;
+    const exchange = parseFloat(document.getElementById('lcExchange').value) || 1;
+    const icmsPct = parseFloat(document.getElementById('lcICMS').value) || 0;
+    const ncmCode = document.getElementById('lcNCM').value;
+    const ncm = GLOBAL_DATA.ncmRates[ncmCode];
+
+    const cif = fob + freight + insurance;
+    const cifBRL = cif * exchange;
+    const ii = cifBRL * (ncm.ii / 100);
+    const ipiBase = cifBRL + ii;
+    const ipi = ipiBase * (ncm.ipi / 100);
+    const pis = cifBRL * (ncm.pis / 100);
+    const cofins = cifBRL * (ncm.cofins / 100);
+    const storage = cifBRL * (storagePct / 100);
+    const customsBRL = customs * exchange;
+    const icmsBase = cifBRL + ii + ipi + pis + cofins + storage + customsBRL;
+    const icms = icmsBase * (icmsPct / (100 - icmsPct));
+    const totalBRL = cifBRL + ii + ipi + pis + cofins + storage + customsBRL + icms;
+    const markup = totalBRL / cifBRL;
+
+    document.getElementById('lcResult').innerHTML = `
+        <div class="calc-row"><span>Preço FOB</span><span>${formatBRL(fob * exchange)}</span></div>
+        <div class="calc-row"><span>+ Frete Internacional</span><span>${formatBRL(freight * exchange)}</span></div>
+        <div class="calc-row"><span>+ Seguro</span><span>${formatBRL(insurance * exchange)}</span></div>
+        <div class="calc-row"><span><strong>= Valor CIF</strong></span><span><strong>${formatBRL(cifBRL)}</strong></span></div>
+        <div class="calc-row"><span>+ II (${ncm.ii}%)</span><span>${formatBRL(ii)}</span></div>
+        <div class="calc-row"><span>+ IPI (${ncm.ipi}%)</span><span>${formatBRL(ipi)}</span></div>
+        <div class="calc-row"><span>+ PIS (${ncm.pis}%)</span><span>${formatBRL(pis)}</span></div>
+        <div class="calc-row"><span>+ COFINS (${ncm.cofins}%)</span><span>${formatBRL(cofins)}</span></div>
+        <div class="calc-row"><span>+ Armazenagem (${storagePct}%)</span><span>${formatBRL(storage)}</span></div>
+        <div class="calc-row"><span>+ Despacho Aduaneiro</span><span>${formatBRL(customsBRL)}</span></div>
+        <div class="calc-row"><span>+ ICMS (${icmsPct}%)</span><span>${formatBRL(icms)}</span></div>
+        <div class="calc-row total"><span>🎯 CUSTO TOTAL POSTO</span><span>${formatBRL(totalBRL)}</span></div>
+        <div class="calc-row" style="color:var(--accent);"><span>Markup tributário</span><span>${markup.toFixed(2)}x</span></div>
+    `;
+}
+
+function renderIncotermComparison() {
+    const fob = parseFloat(document.getElementById('lcFOB').value) || 10000;
+    const base = fob * 5.12; // BRL
+
+    const incoterms = [
+        { code: 'EXW', name: 'Ex Works', cost: base * 1.95, risk: 'Máximo comprador', color: '#ef4444' },
+        { code: 'FOB', name: 'Free On Board', cost: base * 1.75, risk: 'Dividido', color: '#f59e0b' },
+        { code: 'CIF', name: 'Cost, Insurance & Freight', cost: base * 1.62, risk: 'Vendedor até destino', color: '#3b82f6' },
+        { code: 'DAP', name: 'Delivered At Place', cost: base * 1.58, risk: 'Vendedor quase total', color: '#10b981' },
+        { code: 'DDP', name: 'Delivered Duty Paid', cost: base * 1.48, risk: 'Total vendedor', color: '#00d4ff' }
+    ];
+
+    document.getElementById('incotermComparison').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+            ${incoterms.map(i => `
+                <div style="padding:16px;background:var(--bg-700);border-radius:10px;border-top:3px solid ${i.color};">
+                    <div style="font-weight:700;font-size:14px;">${i.code}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">${i.name}</div>
+                    <div style="font-size:20px;font-weight:800;color:${i.color};">${formatBRL(i.cost)}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">⚖️ ${i.risk}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// =============== DOCS ===============
+function renderDocs() {
+    const docs = [
+        { icon: '📜', name: 'Bill of Lading (BL)', meta: 'Contrato de transporte marítimo', status: 'delivered', tag: 'Obrigatório' },
+        { icon: '✈️', name: 'Air Waybill (AWB)', meta: 'Contrato de transporte aéreo', status: 'delivered', tag: 'Aéreo' },
+        { icon: '💼', name: 'Commercial Invoice', meta: 'Fatura comercial internacional', status: 'delivered', tag: 'Obrigatório' },
+        { icon: '📋', name: 'Packing List', meta: 'Relação de volumes e conteúdo', status: 'delivered', tag: 'Obrigatório' },
+        { icon: '🏛️', name: 'Certificate of Origin', meta: 'Origem da mercadoria', status: 'customs', tag: 'Condicional' },
+        { icon: '🌿', name: 'Fitossanitário', meta: 'VIGIAGRO / MAPA', status: 'pending', tag: 'Agrícola' },
+        { icon: '💊', name: 'Certificado Anvisa', meta: 'Produtos de saúde', status: 'pending', tag: 'Regulado' },
+        { icon: '📄', name: 'LPCO / Siscomex', meta: 'Licença de importação', status: 'customs', tag: 'Gov BR' },
+        { icon: '📝', name: 'DI - Declaração Importação', meta: 'Desembaraço aduaneiro BR', status: 'delivered', tag: 'Gov BR' },
+        { icon: '🛡️', name: 'Apólice de Seguro', meta: 'Cobertura internacional', status: 'delivered', tag: 'Seguro' }
+    ];
+    document.getElementById('docsList').innerHTML = docs.map(d => `
+        <div class="doc-item">
+            <div class="doc-info">
+                <span class="doc-icon">${d.icon}</span>
+                <div>
+                    <div class="doc-name">${d.name}</div>
+                    <div class="doc-meta">${d.meta} • <span class="badge badge-${d.status}" style="padding:2px 6px;font-size:10px;"><span class="badge-dot"></span>${d.tag}</span></div>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-secondary">Gerar PDF</button>
+        </div>
+    `).join('');
+}
+
+// =============== AI ===============
+function renderETAPredictions() {
+    const active = shipments.filter(s => s.status !== 'delivered');
+    document.getElementById('etaPrediction').innerHTML = active.slice(0, 5).map(s => {
+        const variance = s.status === 'delayed' ? Math.floor(Math.random() * 5) + 3 : Math.floor(Math.random() * 3) - 1;
+        const confidence = s.status === 'delayed' ? 78 : Math.floor(Math.random() * 10) + 90;
+        const newETA = Math.max(1, s.eta + variance);
+        const riskFactors = [];
+        if (variance > 0) riskFactors.push('⛈️ Clima');
+        if (s.mode === 'sea') riskFactors.push('🚢 Congestão portuária');
+        if (s.status === 'customs') riskFactors.push('🛃 Alfândega');
+        if (riskFactors.length === 0) riskFactors.push('✅ Sem riscos');
+
+        return `<tr>
+            <td style="font-family:monospace;color:var(--accent);">${s.bl}</td>
+            <td>${s.eta}d</td>
+            <td><strong style="color:${variance > 2 ? 'var(--danger)' : variance > 0 ? 'var(--warning)' : 'var(--success)'};">${newETA}d ${variance > 0 ? '(+' + variance + 'd)' : variance < 0 ? '(' + variance + 'd)' : ''}</strong></td>
+            <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${confidence}%;background:${confidence >= 90 ? 'var(--success)' : confidence >= 80 ? 'var(--warning)' : 'var(--danger)'}"></div>
+                    </div>
+                    <span style="font-size:11px;font-weight:700;">${confidence}%</span>
+                </div>
+            </td>
+            <td>${riskFactors.join(' ')}</td>
+        </tr>`;
+    }).join('');
+}
+
+function runWhatIf() {
+    const scenario = document.getElementById('whatifScenario').value;
+    const modalChange = document.getElementById('whatifModal').value;
+
+    const impacts = {
+        none: { days: 0, cost: 0, co2: 0, risk: 'low' },
+        suez: { days: 7, cost: 18500, co2: 4200, risk: 'high' },
+        panama: { days: 5, cost: 12000, co2: 2800, risk: 'med' },
+        strike: { days: 10, cost: 24000, co2: 5500, risk: 'high' },
+        weather: { days: 14, cost: 38000, co2: 8200, risk: 'high' },
+        sanction: { days: 12, cost: 32000, co2: 7100, risk: 'high' }
+    };
+
+    const modalAdj = {
+        current: { cost: 0, co2: 0 },
+        sea: { cost: -8500, co2: -6200 },
+        air: { cost: 48000, co2: 18500 },
+        rail: { cost: 4500, co2: -3800 }
+    };
+
+    const impact = impacts[scenario];
+    const adj = modalAdj[modalChange];
+    const totalDays = impact.days;
+    const totalCost = impact.cost + adj.cost;
+    const totalCO2 = impact.co2 + adj.co2;
+
+    document.getElementById('whatifResult').innerHTML = `
+        <div class="calc-result">
+            <div class="calc-row"><span>Impacto no Lead Time</span><span style="color:${totalDays > 5 ? 'var(--danger)' : totalDays > 0 ? 'var(--warning)' : 'var(--success)'};">+${totalDays} dias</span></div>
+            <div class="calc-row"><span>Custo Adicional</span><span>${formatBRL(totalCost * 5.12)}</span></div>
+            <div class="calc-row"><span>Impacto CO₂</span><span>${totalCO2 > 0 ? '+' : ''}${totalCO2} kg</span></div>
+            <div class="calc-row"><span>Nível de Risco</span><span class="risk-score risk-${impact.risk}">${impact.risk.toUpperCase()}</span></div>
+            <div class="calc-row total"><span>Recomendação IA</span><span>${scenario === 'none' ? 'Manter operação' : totalCost > 25000 ? 'Acionar seguro' : 'Absorver impacto'}</span></div>
+        </div>
+    `;
+}
+
+// =============== ESG ===============
+function calcCO2() {
+    const weight = parseFloat(document.getElementById('esgWeight').value) || 1;
+    const distance = parseFloat(document.getElementById('esgDistance').value) || 1;
+
+    // Fatores de emissão em kg CO2 por tonelada*km
+    const factors = {
+        sea: { value: 0.012, icon: '🚢', name: 'Marítimo', color: '#0ea5e9' },
+        rail: { value: 0.024, icon: '🚆', name: 'Ferroviário', color: '#a855f7' },
+        road: { value: 0.090, icon: '🚛', name: 'Rodoviário', color: '#10b981' },
+        air: { value: 0.602, icon: '✈️', name: 'Aéreo', color: '#f59e0b' }
+    };
+
+    const results = Object.entries(factors).map(([key, f]) => ({
+        key,
+        ...f,
+        co2: weight * distance * f.value,
+        time: key === 'air' ? distance / 800 : key === 'rail' ? distance / 60 : key === 'road' ? distance / 80 : distance / 25
+    })).sort((a, b) => a.co2 - b.co2);
+
+    const best = results[0];
+    const worst = results[results.length - 1];
+    const savings = worst.co2 - best.co2;
+
+    document.getElementById('co2Comparison').innerHTML = results.map((r, i) => `
+        <div class="co2-option ${i === 0 ? 'recommended' : ''}">
+            <div class="icon">${r.icon}</div>
+            <div class="mode">${r.name}</div>
+            <div class="value" style="color:${r.color};">${r.co2.toFixed(0)}</div>
+            <div class="unit">kg CO₂e</div>
+            <div class="unit" style="margin-top:6px;">${r.time.toFixed(0)} dias</div>
+            ${i === 0 ? '<div style="font-size:10px;color:var(--success);font-weight:700;margin-top:6px;">✓ RECOMENDADO</div>' : ''}
+        </div>
+    `).join('');
+
+    document.getElementById('co2Recommendation').innerHTML = `
+        <div style="font-size:13px;line-height:1.8;">
+            <strong style="color:var(--success);">🌱 Recomendação:</strong> O modal <strong>${best.name}</strong> emite <strong>${savings.toFixed(0)} kg</strong> a menos de CO₂ que o ${worst.name} (${((savings/worst.co2)*100).toFixed(0)}% de redução).<br>
+            <strong>🌳 Equivalente a:</strong> Plantar ${(savings/22).toFixed(0)} árvores ou evitar ${(savings*0.4).toFixed(0)} km dirigindo um carro.
+        </div>
+    `;
+
+    document.getElementById('esgTotal').textContent = (shipments.reduce((s, sh) => s + calcCO2ForShipment(sh), 0) / 1000).toFixed(1) + ' t';
+    document.getElementById('esgPerTEU').textContent = '38 kg';
+}
+
+function renderESGChart() {
+    if (charts.esg) charts.esg.destroy();
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#e5e7eb' : '#111827';
+    
+    const co2ByMode = { sea: 0, air: 0, road: 0, rail: 0 };
+    shipments.forEach(s => co2ByMode[s.mode] += calcCO2ForShipment(s));
+
+    charts.esg = new Chart(document.getElementById('chartESG'), {
+        type: 'bar',
+        data: {
+            labels: ['Marítimo', 'Aéreo', 'Rodoviário', 'Ferroviário'],
+            datasets: [{
+                label: 'CO₂ (ton)',
+                data: [co2ByMode.sea, co2ByMode.air, co2ByMode.road, co2ByMode.rail].map(v => v / 1000),
+                backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981', '#a855f7'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { ticks: { color: textColor }, grid: { color: isDark ? 'rgba(55,65,81,0.3)' : 'rgba(229,231,235,0.5)' } },
+                x: { ticks: { color: textColor }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+// =============== RISK ===============
+function renderRisk() {
+    const risks = [
+        { region: 'Estreito de Ormuz', level: 'high', sanction: 'Sim', stability: 'Instável', cpi: 25, rec: 'Rota alternativa via Cabo' },
+        { region: 'Mar Vermelho', level: 'high', sanction: 'Parcial', stability: 'Conflito', cpi: 32, rec: 'Desvio Cabo da Boa Esperança' },
+        { region: 'Canal do Panamá', level: 'med', sanction: 'Não', stability: 'Restrição hídrica', cpi: 52, rec: 'Monitorar calado de navios' },
+        { region: 'Estreito de Malaca', level: 'med', sanction: 'Não', stability: 'Pirataria', cpi: 48, rec: 'Escolta naval' },
+        { region: 'Canal de Suez', level: 'low', sanction: 'Não', stability: 'Estável', cpi: 58, rec: 'Operação normal' },
+        { region: 'Ártico (NSR)', level: 'med', sanction: 'Parcial', stability: 'Sazonal', cpi: 40, rec: 'Apenas verão (Jul-Out)' }
+    ];
+
+    document.getElementById('riskMonitor').innerHTML = risks.slice(0, 3).map(r => `
+        <div class="insight-card" style="border-left-color:${r.level === 'high' ? 'var(--danger)' : r.level === 'med' ? 'var(--warning)' : 'var(--success)'};">
+            <div class="insight-header">
+                <span>${r.level === 'high' ? '🚨' : r.level === 'med' ? '⚠️' : '✅'} ${r.region}</span>
+                <span class="risk-score risk-${r.level}">${r.level.toUpperCase()}</span>
+            </div>
+            <div class="insight-body">${r.stability} • Recomendação: ${r.rec}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('riskTable').innerHTML = risks.map(r => `
+        <tr>
+            <td><strong>${r.region}</strong></td>
+            <td><span class="risk-score risk-${r.level}">${r.level.toUpperCase()}</span></td>
+            <td>${r.sanction}</td>
+            <td>${r.stability}</td>
+            <td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${r.cpi}%;background:${r.cpi >= 50 ? 'var(--success)' : r.cpi >= 30 ? 'var(--warning)' : 'var(--danger)'}"></div></div><span style="font-size:11px;">${r.cpi}</span></div></td>
+            <td style="font-size:12px;">${r.rec}</td>
+        </tr>
+    `).join('');
+}
+
+function renderDualSourcing() {
+    const strategies = [
+        { product: 'Semicondutores', primary: '🌏 TechSource Ásia', backup: '🌍 Advanced Materials EU', risk: 'high' },
+        { product: 'Baterias Li-ion', primary: '🌏 Precision Ásia', backup: '🌎 Global Parts NA', risk: 'med' },
+        { product: 'Displays OLED', primary: '🌏 Ásia', backup: '🌍 Europa', risk: 'med' },
+        { product: 'Chassis Aço', primary: '🌎 América do Sul', backup: '🌎 América Norte', risk: 'low' }
+    ];
+    document.getElementById('dualSourcing').innerHTML = strategies.map(s => `
+        <div class="doc-item">
+            <div class="doc-info">
+                <span class="doc-icon">🔀</span>
+                <div>
+                    <div class="doc-name">${s.product}</div>
+                    <div class="doc-meta">Principal: ${s.primary} • Backup: ${s.backup}</div>
+                </div>
+            </div>
+            <span class="risk-score risk-${s.risk}">${s.risk.toUpperCase()}</span>
         </div>
     `).join('');
 }
 
 // =============== CARRIERS ===============
 function renderCarriers() {
-    const tbody = document.getElementById('carriersTable');
-    tbody.innerHTML = GLOBAL_DATA.carriers.map(c => `
+    document.getElementById('carriersTable').innerHTML = GLOBAL_DATA.carriers.map(c => `
         <tr>
             <td><strong>${c.name}</strong></td>
             <td>${c.hq}</td>
-            <td><span class="badge pending">${c.mode}</span></td>
+            <td><span class="badge badge-transit">${c.mode}</span></td>
             <td>${c.fleet}</td>
             <td>${c.coverage}</td>
             <td>
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <div style="flex:1;height:6px;background:var(--bg-900);border-radius:3px;overflow:hidden;">
+                    <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
                         <div style="height:100%;width:${c.otif}%;background:linear-gradient(90deg,${c.otif >= 95 ? 'var(--success)' : c.otif >= 92 ? 'var(--warning)' : 'var(--danger)'});"></div>
                     </div>
                     <strong style="font-size:12px;">${c.otif}%</strong>
                 </div>
+            </td>
+            <td>
+                <span class="badge ${c.co2 < 20 ? 'badge-delivered' : c.co2 < 40 ? 'badge-customs' : 'badge-delayed'}">
+                    <span class="badge-dot"></span>${c.co2} g/TEU
+                </span>
             </td>
         </tr>
     `).join('');
@@ -1387,14 +2834,14 @@ function renderCarriers() {
 
 // =============== SUPPLIERS ===============
 function renderSuppliers() {
-    const tbody = document.getElementById('suppliersTable');
-    tbody.innerHTML = GLOBAL_DATA.suppliers.map(s => `
+    document.getElementById('suppliersTable').innerHTML = GLOBAL_DATA.suppliers.map(s => `
         <tr>
             <td><strong>${s.name}</strong></td>
-            <td>${s.country}</td>
+            <td>${s.region}</td>
             <td>${s.sector}</td>
-            <td><span class="badge ${s.tier === 'Tier 1' ? 'transit' : 'pending'}">${s.tier}</span></td>
+            <td><span class="badge ${s.tier === 'Tier 1' ? 'badge-transit' : 'badge-pending'}">${s.tier}</span></td>
             <td>${s.lead}</td>
+            <td><span class="risk-score ${s.esg.startsWith('A') ? 'risk-low' : s.esg.startsWith('B') ? 'risk-med' : 'risk-high'}">${s.esg}</span></td>
             <td>
                 <span style="color:#fbbf24;">${'★'.repeat(Math.floor(s.rating))}${'☆'.repeat(5 - Math.floor(s.rating))}</span>
                 <strong style="margin-left:6px;">${s.rating}</strong>
@@ -1403,75 +2850,122 @@ function renderSuppliers() {
     `).join('');
 }
 
+// =============== PORTAL ===============
+function renderUsers() {
+    document.getElementById('usersTable').innerHTML = GLOBAL_DATA.users.map(u => `
+        <tr>
+            <td><strong>${u.name}</strong></td>
+            <td style="font-size:12px;">${u.email}</td>
+            <td><span class="badge badge-transit">${u.role}</span></td>
+            <td>${u.company}</td>
+            <td style="font-size:12px;color:var(--text-muted);">${u.lastAccess}</td>
+            <td>${u.status === 'active' ? getStatusBadge('delivered').replace('✅', '🟢') + ' Ativo' : '<span class="badge badge-pending">Pendente</span>'}</td>
+        </tr>
+    `).join('');
+}
+
+function renderWorkflow() {
+    const workflows = [
+        { title: 'Aprovação de embarque > $500k', requester: 'Maria Santos', approver: 'Diretoria', status: 'customs', step: '2/3' },
+        { title: 'Liberação de crédito fornecedor', requester: 'João Pereira', approver: 'Financeiro', status: 'transit', step: '1/2' },
+        { title: 'Contrato de frete internacional', requester: 'Admin SCM', approver: 'Jurídico', status: 'delivered', step: '3/3' },
+        { title: 'Exceção de atraso crítico', requester: 'Sistema', approver: 'Gerência Operações', status: 'delayed', step: '1/1' }
+    ];
+    document.getElementById('workflowList').innerHTML = workflows.map(w => `
+        <div class="doc-item">
+            <div class="doc-info">
+                <span class="doc-icon">🔄</span>
+                <div>
+                    <div class="doc-name">${w.title}</div>
+                    <div class="doc-meta">Solicitante: ${w.requester} • Aprovador: ${w.approver} • Etapa ${w.step}</div>
+                </div>
+            </div>
+            ${getStatusBadge(w.status)}
+        </div>
+    `).join('');
+}
+
 // =============== REPORTS ===============
 function renderReports() {
-    if (charts.teu) charts.teu.destroy();
-    if (charts.revenue) charts.revenue.destroy();
-    if (charts.otifChart) charts.otifChart.destroy();
-    if (charts.costs) charts.costs.destroy();
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#e5e7eb' : '#111827';
+    const gridColor = isDark ? 'rgba(55,65,81,0.3)' : 'rgba(229,231,235,0.5)';
 
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const teuData = [420, 485, 510, 495, 540, 612, 678, 645, 720, 698, 760, 820];
 
+    if (charts.teu) charts.teu.destroy();
     charts.teu = new Chart(document.getElementById('reportTEU'), {
         type: 'line',
         data: {
             labels: months,
             datasets: [{
                 label: 'TEU (mil)',
-                data: teuData,
+                data: [420, 485, 510, 495, 540, 612, 678, 645, 720, 698, 760, 820],
                 borderColor: '#00d4ff',
-                backgroundColor: 'rgba(0,212,255,0.1)',
-                tension: 0.4,
-                fill: true
+                backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                tension: 0.4, fill: true
             }]
         },
         options: {
-            responsive: true,
+            responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
-                x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+                y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor }, grid: { display: false } }
             }
         }
     });
 
+    if (charts.revenue) charts.revenue.destroy();
     charts.revenue = new Chart(document.getElementById('reportRevenue'), {
         type: 'doughnut',
         data: {
             labels: ['Marítimo', 'Aéreo', 'Rodoviário', 'Ferroviário'],
-            datasets: [{
-                data: [48, 32, 14, 6],
-                backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981', '#a855f7']
-            }]
+            datasets: [{ data: [48, 32, 14, 6], backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981', '#a855f7'] }]
         },
         options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 } } } }
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } } }
         }
     });
 
+    if (charts.otifChart) charts.otifChart.destroy();
     charts.otifChart = new Chart(document.getElementById('reportOTIF'), {
         type: 'bar',
         data: {
             labels: GLOBAL_DATA.carriers.slice(0, 5).map(c => c.name.split(' ')[0]),
-            datasets: [{
-                label: 'OTIF %',
-                data: GLOBAL_DATA.carriers.slice(0, 5).map(c => c.otif),
-                backgroundColor: '#10b981',
-                borderRadius: 6
-            }]
+            datasets: [{ label: 'OTIF %', data: GLOBAL_DATA.carriers.slice(0, 5).map(c => c.otif), backgroundColor: '#10b981', borderRadius: 6 }]
         },
         options: {
-            responsive: true,
+            responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { min: 85, max: 100, ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
-                x: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { display: false } }
+                y: { min: 85, max: 100, ticks: { color: textColor }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } }
             }
         }
     });
 
+    // Top Vendors from historical PDF data
+    document.getElementById('topVendors').innerHTML = GLOBAL_DATA.historicalVendors.map((v, i) => {
+        const pct = (v.vendas / 182853.22 * 100).toFixed(1);
+        return `<tr>
+            <td><strong style="color:${i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#cd7f32' : 'var(--text)'};">#${i + 1}</strong></td>
+            <td><strong>${v.name}</strong></td>
+            <td>${formatBRL(v.vendas)}</td>
+            <td style="color:var(--success);font-weight:700;">${formatBRL(v.bonus)}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),var(--primary));"></div>
+                    </div>
+                    <span style="font-size:11px;font-weight:700;">${pct}%</span>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+
+    if (charts.costs) charts.costs.destroy();
     charts.costs = new Chart(document.getElementById('reportCosts'), {
         type: 'line',
         data: {
@@ -1484,11 +2978,11 @@ function renderReports() {
             ]
         },
         options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 11 } } } },
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 11 } } } },
             scales: {
-                y: { ticks: { color: '#9ca3af', callback: v => '$' + v + 'k' }, grid: { color: '#1f2937' } },
-                x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+                y: { ticks: { color: textColor, callback: v => '$' + v + 'k' }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor }, grid: { display: false } }
             }
         }
     });
@@ -1501,7 +2995,7 @@ function renderExceptions() {
     const customs = shipments.filter(s => s.status === 'customs');
 
     if (delayed.length === 0 && customs.length === 0) {
-        container.innerHTML = '<div class="empty-state">✅ Nenhuma exceção ativa no momento. Operação dentro dos parâmetros normais.</div>';
+        container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><div>Nenhuma exceção ativa. Operação dentro dos parâmetros.</div></div>';
         return;
     }
 
@@ -1521,10 +3015,10 @@ function renderExceptions() {
                     <div style="color:var(--danger);font-weight:700;">+${Math.floor(Math.random() * 5) + 2} dias</div>
                 </div>
             </div>
-            <div style="margin-top:12px;display:flex;gap:8px;">
-                <button class="btn-secondary" style="font-size:11px;padding:6px 12px;">📞 Contatar Carrier</button>
-                <button class="btn-secondary" style="font-size:11px;padding:6px 12px;">🔄 Replanejar Rota</button>
-                <button class="btn-primary" style="font-size:11px;padding:6px 12px;">📧 Notificar Cliente</button>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-sm btn-secondary">📞 Contatar Carrier</button>
+                <button class="btn btn-sm btn-secondary">🔄 Replanejar Rota</button>
+                <button class="btn btn-sm btn-primary">📧 Notificar Cliente</button>
             </div>
         </div>`;
     });
@@ -1538,8 +3032,78 @@ function renderExceptions() {
     container.innerHTML = html;
 }
 
+// =============== UTILS ===============
+function getModeName(m) { return { sea: 'SEA', air: 'AIR', road: 'ROAD', rail: 'RAIL' }[m] || m; }
+
+function getStatusBadge(status) {
+    const map = {
+        pending: ['pending', '📋 Aguardando'],
+        transit: ['transit', '🚢 Em Trânsito'],
+        customs: ['customs', '🛃 Alfândega'],
+        delivered: ['delivered', '✅ Entregue'],
+        delayed: ['delayed', '⚠️ Atrasado']
+    };
+    const [cls, label] = map[status] || ['pending', status];
+    return `<span class="badge badge-${cls}"><span class="badge-dot"></span>${label}</span>`;
+}
+
+function formatBRL(v) { return 'R$ ' + (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<span>✅</span> ${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+function saveShipments() {
+    localStorage.setItem('scm_shipments_v2', JSON.stringify(shipments));
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+}
+
+function exportData() {
+    const data = {
+        shipments: shipments,
+        exportDate: new Date().toISOString(),
+        version: 'Enterprise 2.0'
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `scm-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('📥 Dados exportados com sucesso');
+}
+
+function exportShipmentsCSV() {
+    const headers = ['ID', 'BL', 'Cliente', 'Origem', 'Destino', 'Modal', 'Incoterm', 'Peso', 'Valor', 'Status', 'ETA'];
+    const rows = shipments.map(s => [s.id, s.bl, s.customer, s.origin, s.destination, s.mode, s.incoterm, s.weight, s.value, s.status, s.eta]);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'shipments.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('📊 CSV exportado');
+}
+
 // =============== INIT ===============
 window.addEventListener('load', () => {
+    // Load preferences
+    const savedTheme = localStorage.getItem('scm_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const savedLang = localStorage.getItem('scm_lang') || 'pt';
+    document.querySelector('.lang-select').value = savedLang;
+    changeLanguage(savedLang);
+
     populateForms();
     renderDashboard();
     renderShipmentsTable();
@@ -1547,11 +3111,17 @@ window.addEventListener('load', () => {
     renderCarriers();
     renderSuppliers();
     renderExceptions();
+    renderMiniMap();
 });
 
 document.getElementById('modal').addEventListener('click', e => {
     if (e.target.id === 'modal') closeModal();
 });
+
+// PWA install prompt
+if ('serviceWorker' in navigator) {
+    // Basic PWA ready
+}
 </script>
 
 </body>
